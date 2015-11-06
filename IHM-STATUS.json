@@ -1,0 +1,18 @@
+0. MENSAGEM DE STATUS
+
+{
+"maquina": "IHMAPLANGARRA",
+"datahora": "2015-10-29T12:25:43-0400",
+"operador": "IRANILDO",
+"modo": 2,
+"tempo": 123131,
+"parametros": 
+      [
+        { "medida": "torque_medio", "unidade": "%", "valor": 80},
+        { "medida": "torque_maximo", "unidade": "%", "valor": 160},
+        { "medida": "corrente_media", "unidade": "A", "valor": 1.650000},
+        { "medida": "corrente_maxima", "unidade": "A", "valor": 1.650000},
+        { "medida": "temperatura_media", "unidade": "C", "valor": 27.0000},
+        { "medida": "temperatura_maxima", "unidade": "C", "valor": 29.0000}
+      ]
+}
