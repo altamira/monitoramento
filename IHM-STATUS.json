@@ -1,11 +1,11 @@
 0. MENSAGEM DE STATUS
 
 {
-"maquina": "IHMAPLANGARRA",
+"ihm": "IHMAPLANGARRA",
 "datahora": "2015-10-29T12:25:43-0400",
 "operador": "IRANILDO",
-"modo": 2,
-"tempo": 123131,
+"modo": 3,
+"tempo": 456,
 "parametros": 
       [
         { "medida": "torque_medio", "unidade": "%", "valor": 80},

@@ -10,10 +10,14 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 
+import br.com.altamira.monitoramento.model.IHM;
+import br.com.altamira.monitoramento.model.IHMLog;
 import br.com.altamira.monitoramento.model.MaquinaLog;
 import br.com.altamira.monitoramento.model.MaquinaLogParametro;
-import br.com.altamira.monitoramento.msg.MedidaMsg;
-import br.com.altamira.monitoramento.msg.MonitoramentoMsg;
+import br.com.altamira.monitoramento.msg.ParametroMsg;
+import br.com.altamira.monitoramento.msg.StatusMsg;
+import br.com.altamira.monitoramento.repository.IHMLogRepository;
+import br.com.altamira.monitoramento.repository.IHMRepository;
 import br.com.altamira.monitoramento.repository.MaquinaLogParametroRepository;
 import br.com.altamira.monitoramento.repository.MaquinaLogRepository;
 import br.com.altamira.monitoramento.repository.MaquinaRepository;
@@ -36,6 +40,12 @@ public class MonitoramentoController {
 	private MaquinaLogParametroRepository maquinaLogParametroRepository;
 
 	@Autowired
+	private IHMRepository ihmRepository;
+	
+	@Autowired
+	private IHMLogRepository ihmLogRepository;
+	
+	@Autowired
 	private MedidaRepository medidaRepository;
 	
 	@Autowired
@@ -49,40 +59,65 @@ public class MonitoramentoController {
 				"\n--------------------------------------------------------------------------------\nCHEGOU MENSAGEM DE IHM-STATUS\n--------------------------------------------------------------------------------\n%s\n--------------------------------------------------------------------------------\n", msg));
 		
 		ObjectMapper mapper = new ObjectMapper();
-		MonitoramentoMsg monitoramentoMsg = mapper.readValue(msg, MonitoramentoMsg.class);
+		StatusMsg statusMsg = mapper.readValue(msg, StatusMsg.class);
 		
-		MaquinaLog log = new MaquinaLog(
-				monitoramentoMsg.getMaquina().toUpperCase(),
-				monitoramentoMsg.getDatahora(),
-				monitoramentoMsg.getModo(),
-				monitoramentoMsg.getTempo(),
-				monitoramentoMsg.getOperador()
+		IHM ihm = ihmRepository.findOne(statusMsg.getIHM());
+		
+		if (ihm == null) {
+			System.out.println(String.format(
+					"\n--------------------------------------------------------------------------------\nIHM NAO CADASTRADA: %s\n--------------------------------------------------------------------------------\n", statusMsg.getIHM()));
+			return;
+		}
+		
+		IHMLog ihmLog = new IHMLog(
+				statusMsg.getIHM().toUpperCase(),
+				statusMsg.getDatahora(),
+				statusMsg.getModo(),
+				statusMsg.getTempo(),
+				statusMsg.getOperador()
 				);
 		
-		maquinaLogRepository.saveAndFlush(log);
+		ihmLogRepository.saveAndFlush(ihmLog);
 		
-		System.out.println(String.format("LOG ID: %d", log.getId()));
+		System.out.println(String.format("IHM LOG ID: %d", ihmLog.getId()));
 		
-		log.setParametros(new HashSet<MaquinaLogParametro>());
-		
-		if (monitoramentoMsg.getParametros() != null) {
-			for (MedidaMsg medidaMsg : monitoramentoMsg.getParametros()) {
-				MaquinaLogParametro maquinaLogParametro = new MaquinaLogParametro(
-								log.getId(), 
-								medidaMsg.getMedida(), 
-								medidaMsg.getUnidade(), 
-								medidaMsg.getValor());
-				maquinaLogParametroRepository.saveAndFlush(maquinaLogParametro);
+		if (ihm.getMaquina() != null) {
+			
+			MaquinaLog maquinaLog = new MaquinaLog(
+					ihm.getMaquina().toUpperCase(),
+					statusMsg.getDatahora(),
+					statusMsg.getModo(),
+					statusMsg.getTempo(),
+					statusMsg.getOperador()
+					);
+			
+			maquinaLogRepository.saveAndFlush(maquinaLog);
+			
+			System.out.println(String.format("LOG ID: %d", maquinaLog.getId()));
+			
+			maquinaLog.setParametros(new HashSet<MaquinaLogParametro>());
+			
+			if (statusMsg.getParametros() != null) {
+				for (ParametroMsg medidaMsg : statusMsg.getParametros()) {
+					MaquinaLogParametro maquinaLogParametro = new MaquinaLogParametro(
+							maquinaLog.getId(), 
+							medidaMsg.getMedida(), 
+							medidaMsg.getUnidade(), 
+							medidaMsg.getValor());
+					maquinaLogParametroRepository.saveAndFlush(maquinaLogParametro);
+				}
 			}
+			
 		}
 		
 		String approximateFirstReceiveTimestamp = String.valueOf(new Date().getTime());
 		
         try {
-            this.sendingTextWebSocketHandler.broadcastToSessions(new DataWithTimestamp<MaquinaLog>(log, approximateFirstReceiveTimestamp));
+            this.sendingTextWebSocketHandler.broadcastToSessions(new DataWithTimestamp<StatusMsg>(statusMsg, approximateFirstReceiveTimestamp));
         } catch (IOException e) {
         	System.out.println(String.format("\n********************************************************************************\nWas not able to push the message to the client.\n********************************************************************************\n%s\n********************************************************************************\n", e.getMessage()));
         }
+	
 		
 	}
 	

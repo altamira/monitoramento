@@ -3,9 +3,9 @@ package br.com.altamira.monitoramento.msg;
 import java.util.Date;
 import java.util.List;
 
-public class MonitoramentoMsg {
+public class StatusMsg {
 
-	private String maquina;
+	private String ihm;
 	
 	private Date datahora;
 	
@@ -15,14 +15,14 @@ public class MonitoramentoMsg {
 	
 	private int tempo;
 	
-	private List<MedidaMsg> parametros;
+	private List<ParametroMsg> parametros;
 
-	public String getMaquina() {
-		return maquina;
+	public String getIHM() {
+		return ihm;
 	}
 
-	public void setMaquina(String maquina) {
-		this.maquina = maquina;
+	public void setIHM(String ihm) {
+		this.ihm = ihm;
 	}
 
 	public Date getDatahora() {
@@ -57,11 +57,11 @@ public class MonitoramentoMsg {
 		this.tempo = tempo;
 	}
 
-	public List<MedidaMsg> getParametros() {
+	public List<ParametroMsg> getParametros() {
 		return parametros;
 	}
 
-	public void setParametros(List<MedidaMsg> parametros) {
+	public void setParametros(List<ParametroMsg> parametros) {
 		this.parametros = parametros;
 	}
 	

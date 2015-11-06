@@ -2,7 +2,7 @@ package br.com.altamira.monitoramento.msg;
 
 import java.math.BigDecimal;
 
-public class MedidaMsg {
+public class ParametroMsg {
 
 	private String medida;
 	

@@ -24,9 +24,9 @@
                 <tbody>
                 <tr ng-repeat="row in sqs.responses">
                     <td>{{ row.timestamp | date : 'mediumTime' }}</td>
-                    <td>{{ row.data.maquina }}</td>
+                    <td>{{ row.data.ihm }}</td>
                     <td>{{ row.data.modo | modoOperacao }}</td>
-                    <td>{{ row.data.usuario }}</td>
+                    <td>{{ row.data.operador }}</td>
                     <td>{{ row.data.tempo }}</td>
                 </tr>
                 </tbody>
