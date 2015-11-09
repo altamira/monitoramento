@@ -1,9 +1,9 @@
 /* global angular,hljs */
 (function () {
-    var springCloudAws = angular.module('SpringCloudAws', ['ngRoute']);
+    var monitor = angular.module('monitor', ['ngRoute']);
 
     // Global stuff
-    springCloudAws.directive('active', function ($location) {
+    monitor.directive('active', function ($location) {
         return {
             link: function (scope, element) {
                 function makeActiveIfMatchesCurrentPath() {
@@ -21,13 +21,13 @@
         };
     });
 
-    springCloudAws.service('SourceCodeService', function ($http) {
+    monitor.service('SourceCodeService', function ($http) {
         this.getSourceCode = function (path) {
             return $http.get('source?path=' + path);
         };
     });
 
-    springCloudAws.directive('sourceCode', function (SourceCodeService, $timeout) {
+    monitor.directive('sourceCode', function (SourceCodeService, $timeout) {
         return {
             restrict: 'E',
             templateUrl: 'templates/source-box.tpl.html',
@@ -47,14 +47,56 @@
         }
     });
 
+    // menu services
+    monitor.service('MaquinaService', function ($http) {
+    	this.getAll = function () {
+            return $http.get('/maquinas');
+        }
+    });
+
+    monitor.controller('MenuCtrl', function (MaquinaService, $scope) {
+    	var self = this;
+        self.options = [];
+
+        function refresh() {
+        	MaquinaService.getAll().then(function (response) {
+                self.options = response.data._embedded.maquinas;
+            });
+        }
+
+        refresh();
+        
+        function initView() {
+
+            var sock = new SockJS('/notify');
+            sock.onmessage = function (response) {
+                var msg = JSON.parse(response.data);
+
+                for( var i = 0; i < self.options.length; ++i ) {
+                	if (self.options[i].codigo == msg.data.maquina) {
+                		self.options[i].tempo = msg.data.tempo;
+                		self.options[i].situacao = msg.data.modo;
+                	}
+                }
+                
+                $scope.$apply();
+            };
+        }
+
+        initView();        
+
+    });
+    
+    // end menu services
+    
     // SQS
-    springCloudAws.service('SqsService', function ($http) {
+    monitor.service('SqsService', function ($http) {
         this.sendMessage = function (message) {
             return $http.post('sqs/message-processing-queue', message);
         };
     });
 
-    springCloudAws.controller('SqsCtrl', function (SqsService, $scope) {
+    monitor.controller('SqsCtrl', function (SqsService, $scope) {
         var self = this;
         self.model = {};
         self.responses = [];
@@ -91,7 +133,23 @@
         initView();
     });
 
-    springCloudAws.filter('modoOperacao', function () {
+    monitor.filter('statusClass', function () {
+        return function (input) {
+            switch (input) {
+            case 0: return 'badge badge-danger';
+            case 1: return 'label label-info';
+            case 2: return 'label label-success';
+            case 3: return 'label label-info';
+            case 4: return 'label label-info';
+            case 5: return 'badge badge-danger';
+            case 6: return 'label label-info';
+            case 7: return 'label label-warning';
+            case 99: return 'badge badge-danger';
+            }
+        }
+    });
+    
+    monitor.filter('modoOperacao', function () {
         return function (input) {
             switch (input) {
             case 0: return 'Parada Indeterminado';
@@ -100,11 +158,14 @@
             case 3: return 'Manual';
             case 4: return 'Preparacao';
             case 5: return 'Manutencao';
+            case 6: return 'Maq. Desligada';
+            case 7: return 'IHM Desligada';
+            case 99: return 'Falha Comunicacao';
             }
         }
-    });
+    });    
     
-    springCloudAws.filter('priority', function () {
+    monitor.filter('priority', function () {
         return function (input) {
             switch (input) {
                 case 1:
@@ -118,13 +179,13 @@
     });
 
     // SNS
-    springCloudAws.service('SnsService', function ($http) {
+    monitor.service('SnsService', function ($http) {
         this.send = function (message) {
             return $http.post('sns/send', message);
         };
     });
 
-    springCloudAws.controller('SnsCtrl', function (SnsService, $scope) {
+    monitor.controller('SnsCtrl', function (SnsService, $scope) {
         var self = this;
         self.responses = [];
 
@@ -161,7 +222,7 @@
     });
 
     // RDS
-    springCloudAws.service('PersonService', function ($http) {
+    monitor.service('PersonService', function ($http) {
         this.add = function (person) {
             return $http.post('persons', person);
         };
@@ -171,7 +232,7 @@
         }
     });
 
-    springCloudAws.controller('RdsCtrl', function (PersonService) {
+    monitor.controller('RdsCtrl', function (PersonService) {
         var self = this;
         self.persons = [];
 
@@ -201,13 +262,13 @@
     });
 
     // ElastiCache
-    springCloudAws.service('ElastiCacheService', function ($http) {
+    monitor.service('ElastiCacheService', function ($http) {
         this.getValue = function (key) {
             return $http.get('cachedService?key=' + key, {headers: {Accept: 'text/plain'}});
         };
     });
 
-    springCloudAws.controller('ElastiCacheCtrl', function ($scope, ElastiCacheService) {
+    monitor.controller('ElastiCacheCtrl', function ($scope, ElastiCacheService) {
         var self = this;
         self.loading = false;
 
@@ -222,13 +283,13 @@
     });
 
     // EC2
-    springCloudAws.service('Ec2Service', function ($http) {
+    monitor.service('Ec2Service', function ($http) {
         this.getProperties = function () {
             return $http.get('info');
         };
     });
 
-    springCloudAws.controller('Ec2Ctrl', function (Ec2Service) {
+    monitor.controller('Ec2Ctrl', function (Ec2Service) {
         var self = this;
 
         Ec2Service.getProperties().then(function (response) {
@@ -236,7 +297,7 @@
         });
     });
 
-    springCloudAws.config(function ($routeProvider) {
+    monitor.config(function ($routeProvider) {
         $routeProvider.when('/home', {templateUrl: 'pages/home.tpl.html'});
         $routeProvider.when('/sqs', {templateUrl: 'pages/sqs.tpl.html'});
         $routeProvider.when('/sns', {templateUrl: 'pages/sns.tpl.html'});

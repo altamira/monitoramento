@@ -19,11 +19,11 @@ public class Maquina {
 	@Column(name = "SETOR")
 	private String setor;
 	
-	@Column(name = "IP_IHM")
-	private String ipIHM;
+	@Column(name = "SITUACAO")
+	private int situacao;
 	
-	@Column(name = "IP_CLP")
-	private String ipCLP;
+	@Column(name = "TEMPO")
+	private int tempo;
 
 	public String getCodigo() {
 		return codigo;
@@ -49,20 +49,20 @@ public class Maquina {
 		this.setor = setor;
 	}
 
-	public String getIpIHM() {
-		return ipIHM;
+	public int getSituacao() {
+		return situacao;
 	}
 
-	public void setIpIHM(String ipIHM) {
-		this.ipIHM = ipIHM;
+	public void setSituacao(int situacao) {
+		this.situacao = situacao;
 	}
 
-	public String getIpCLP() {
-		return ipCLP;
+	public int getTempo() {
+		return tempo;
 	}
 
-	public void setIpCLP(String ipCLP) {
-		this.ipCLP = ipCLP;
+	public void setTempo(int tempo) {
+		this.tempo = tempo;
 	}
 		
 }

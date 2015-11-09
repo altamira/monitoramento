@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import br.com.altamira.monitoramento.model.IHM;
 import br.com.altamira.monitoramento.model.IHMLog;
+import br.com.altamira.monitoramento.model.Maquina;
 import br.com.altamira.monitoramento.model.MaquinaLog;
 import br.com.altamira.monitoramento.model.MaquinaLogParametro;
 import br.com.altamira.monitoramento.msg.ParametroMsg;
@@ -55,9 +56,6 @@ public class MonitoramentoController {
 	@Transactional
 	@JmsListener(destination = "IHM-STATUS")
 	public void monitoramentoStatus(String msg) throws JsonParseException, JsonMappingException, IOException {
-		System.out.println(String.format(
-				"\n--------------------------------------------------------------------------------\nCHEGOU MENSAGEM DE IHM-STATUS\n--------------------------------------------------------------------------------\n%s\n--------------------------------------------------------------------------------\n", msg));
-		
 		ObjectMapper mapper = new ObjectMapper();
 		StatusMsg statusMsg = mapper.readValue(msg, StatusMsg.class);
 		
@@ -66,8 +64,14 @@ public class MonitoramentoController {
 		if (ihm == null) {
 			System.out.println(String.format(
 					"\n--------------------------------------------------------------------------------\nIHM NAO CADASTRADA: %s\n--------------------------------------------------------------------------------\n", statusMsg.getIHM()));
-			return;
+			
+			ihm = new IHM(statusMsg.getIHM());
+		
+			ihmRepository.saveAndFlush(ihm);
 		}
+		
+		System.out.println(String.format(
+				"\n--------------------------------------------------------------------------------\nCHEGOU MENSAGEM DE IHM-STATUS\n--------------------------------------------------------------------------------\n%s\n--------------------------------------------------------------------------------\n", msg));
 		
 		IHMLog ihmLog = new IHMLog(
 				statusMsg.getIHM().toUpperCase(),
@@ -81,10 +85,25 @@ public class MonitoramentoController {
 		
 		System.out.println(String.format("IHM LOG ID: %d", ihmLog.getId()));
 		
-		if (ihm.getMaquina() != null) {
+		if (ihm.getMaquina() != null && !ihm.getMaquina().isEmpty()) {
+			
+			Maquina maquina = maquinaRepository.findOne(ihm.getMaquina().toUpperCase());
+			
+			if (maquina == null) {
+				System.out.println(String.format(
+						"\n--------------------------------------------------------------------------------\nMAQUINA NAO ENCONTRADA: %s\n--------------------------------------------------------------------------------\n", ihm.getMaquina().toUpperCase()));
+				return;
+			} else {
+				statusMsg.setMaquina(maquina.getCodigo());
+			}
+			
+			maquina.setSituacao(statusMsg.getModo());
+			maquina.setTempo(statusMsg.getTempo());
+		
+			maquinaRepository.saveAndFlush(maquina);
 			
 			MaquinaLog maquinaLog = new MaquinaLog(
-					ihm.getMaquina().toUpperCase(),
+					maquina.getCodigo().toUpperCase(),
 					statusMsg.getDatahora(),
 					statusMsg.getModo(),
 					statusMsg.getTempo(),
@@ -95,9 +114,9 @@ public class MonitoramentoController {
 			
 			System.out.println(String.format("LOG ID: %d", maquinaLog.getId()));
 			
-			maquinaLog.setParametros(new HashSet<MaquinaLogParametro>());
-			
 			if (statusMsg.getParametros() != null) {
+				maquinaLog.setParametros(new HashSet<MaquinaLogParametro>());
+				
 				for (ParametroMsg medidaMsg : statusMsg.getParametros()) {
 					MaquinaLogParametro maquinaLogParametro = new MaquinaLogParametro(
 							maquinaLog.getId(), 

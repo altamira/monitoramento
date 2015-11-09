@@ -22,6 +22,23 @@ public class IHM {
 	@Column(name = "MAQUINA")
 	private String maquina;
 
+	public IHM() {
+		super();
+	}
+
+	public IHM(String codigo) {
+		super();
+		this.codigo = codigo;
+	}
+
+	public IHM(String codigo, String setor, String ip, String maquina) {
+		super();
+		this.codigo = codigo;
+		this.setor = setor;
+		this.ip = ip;
+		this.maquina = maquina;
+	}
+
 	public String getCodigo() {
 		return codigo;
 	}

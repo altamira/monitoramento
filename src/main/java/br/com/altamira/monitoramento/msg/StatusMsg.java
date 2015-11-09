@@ -7,6 +7,8 @@ public class StatusMsg {
 
 	private String ihm;
 	
+	private String maquina;
+	
 	private Date datahora;
 	
 	private String operador;
@@ -23,6 +25,14 @@ public class StatusMsg {
 
 	public void setIHM(String ihm) {
 		this.ihm = ihm;
+	}
+
+	public String getMaquina() {
+		return maquina;
+	}
+
+	public void setMaquina(String maquina) {
+		this.maquina = maquina;
 	}
 
 	public Date getDatahora() {
