@@ -391,7 +391,7 @@ Use search to find needed section.
 			</div>
 			<ul class="navigation">
 				<li class="mm-dropdown active" ng-controller="MenuCtrl as menu">
-					<a href="#"><i class="menu-icon fa fa-dashboard"></i><span class="mm-text">Painel de Controle</span><!-- <span class="label label-info">8</span><span class="badge badge-primary">6</span> --><span class="badge badge-danger">3</span></a>
+					<a href="#"><i class="menu-icon fa fa-dashboard"></i><span class="mm-text">Painel de Controle</span><span ng-show="menu.count" class="badge badge-danger">{{ menu.count }}</span></a>
 					<ul>
 						<li ng-repeat="item in menu.options">
 							<a tabindex="-1" href="#"><span class="mm-text">{{ item.nome }}</span><span class="{{ item.situacao | statusClass }}">{{ item.tempo }}s</span></a>

@@ -57,10 +57,18 @@
     monitor.controller('MenuCtrl', function (MaquinaService, $scope) {
     	var self = this;
         self.options = [];
+        self.count = 0;
 
         function refresh() {
         	MaquinaService.getAll().then(function (response) {
                 self.options = response.data._embedded.maquinas;
+                for( var i = 0; i < self.options.length; ++i ) {
+                	if (self.options[i].situacao == '0' ||
+                		self.options[i].situacao == '5' ||
+                		self.options[i].situacao == '99') {
+                		self.count++;
+                	}
+                }
             });
         }
 
@@ -76,6 +84,15 @@
                 	if (self.options[i].codigo == msg.data.maquina) {
                 		self.options[i].tempo = msg.data.tempo;
                 		self.options[i].situacao = msg.data.modo;
+                	}
+                }
+                
+                self.count = 0;
+                for( var i = 0; i < self.options.length; ++i ) {
+                	if (self.options[i].situacao == '0' ||
+                		self.options[i].situacao == '5' ||
+                		self.options[i].situacao == '99') {
+                		self.count++;
                 	}
                 }
                 
