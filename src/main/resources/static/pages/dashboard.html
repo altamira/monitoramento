@@ -1,0 +1,42 @@
+	<div ng-controller="DashboardCtrl as dash">
+		<ul class="breadcrumb breadcrumb-page">
+			<div class="breadcrumb-label text-light-gray">Voce esta aqui: </div>
+			<li><a href="#">Home</a></li>
+			<li class="active"><a href="#">Painel de Controle</a></li>
+		</ul>
+		<div class="page-header">
+			
+			<div class="row">
+				<!-- Page header, center on small screens -->
+				<h1 class="col-xs-12 col-sm-4 text-center text-left-sm"><i class="fa fa-dashboard page-header-icon"></i>&nbsp;&nbsp;Painel de Controle</h1>
+
+				
+			</div>
+		</div> <!-- / .page-header -->
+
+		<div class="container-fluid">
+		  <div class="row">
+		    <div class="col-md-4" ng-repeat="maquina in dash.maquinas">
+		    	<div class="panel {{ maquina.situacao | statusPanelClass }} panel-dark widget-profile">
+					<div class="panel-heading">
+						<div class="widget-profile-header">
+							<span><b>{{ maquina.nome }}</b></span><br>
+							{{ maquina.situacao | statusName }}
+						</div>
+					</div> <!-- / .panel-heading -->
+					<div class="widget-profile-counters">
+						<div class="col-xs-3"><span>{{ maquina.tempo }}</span><br>tempo</div>
+						<div class="col-xs-3"><span>0</span><br>temp.</div>
+						<div class="col-xs-3"><span>0</span><br>torque</div>
+						<div class="col-xs-3"><span>0</span><br>corrente</div>
+					</div>
+					<div class="widget-profile-text">
+						Operador: {{ maquina.operador }}
+					</div>
+				</div> <!-- / .panel -->
+		    </div>
+		  </div>
+		</div>
+
+
+	</div> <!-- / #content-wrapper -->

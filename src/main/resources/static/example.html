@@ -1,0 +1,191 @@
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <title>My first X3DOM page</title>
+    <script src="assets/javascripts/jquery.min.js"></script>
+    
+    <script type='text/javascript' src='http://www.x3dom.org/download/x3dom.js'> </script>
+    <link rel='stylesheet' type='text/css' href='http://www.x3dom.org/download/x3dom.css'/>
+</head>
+<body>
+<h1>Using the Inline Node</h1>
+
+<p>
+    This example includes an external x3d scene. You can even manipulate its content during runtime.
+</p>
+<x3d width='1800px' height='1000px'>
+    <scene>
+            
+            <Inline nameSpaceName="Deer" mapDEFToID="true"
+                    url="Garra.x3d" />
+    </scene>
+</x3d>
+<br>
+<!--<div id="container"></div>
+<script src="./three.min.js"></script>
+<script>
+    $(document).ready(function(){
+      init();
+    });
+
+    /*function init(){
+      container = document.getElementById('container');
+
+      scene = new THREE.Scene();
+
+      var material = new THREE.MeshFaceMaterial();
+      camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
+      camera.position.z = 100;
+      scene.add( camera );
+
+      var loader = new THREE.JSONLoader();
+      loader.load({model:'lego.js',  createScene});
+      renderer = new THREE.WebGLRenderer();
+      renderer.render(scene, camera)
+      renderer.setSize( window.innerWidth, window.innerHeight );
+      container.appendChild(renderer.domElement);
+
+    }
+    function createScene( geometry ) {
+      console.log(geometry);
+      geometry.materials[0].shading = THREE.FlatShading;
+      //geometry.materials[0][0].morphTargets = true;
+
+      var material = new THREE.MeshFaceMaterial();
+
+      mesh = new THREE.Mesh( geometry, material );
+      mesh.scale.set(50, 50, 50);
+
+      scene.addObject( mesh );
+    }
+
+    function redNose()
+    {
+        if(document.getElementById('Deer__MA_Nose').getAttribute('diffuseColor')!= '1 0 0')
+            document.getElementById('Deer__MA_Nose').setAttribute('diffuseColor', '1 0 0');
+        else
+            document.getElementById('Deer__MA_Nose').setAttribute('diffuseColor', '0 0 0');
+    }*/
+
+    var scene, camera, renderer;
+
+    var WIDTH  = window.innerWidth;
+    var HEIGHT = window.innerHeight;
+
+    var SPEED = 0.01;
+
+    function init() {
+        scene = new THREE.Scene();
+
+        initMesh();
+        initCamera();
+        initLights();
+        initRenderer();
+
+        document.body.appendChild(renderer.domElement);
+    }
+
+    function initCamera() {
+        camera = new THREE.PerspectiveCamera(70, 500 / 400, 1, 10);
+        camera.position.set(0, 3.5, 5);
+        camera.lookAt(scene.position);
+    }
+
+
+    function initRenderer() {
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(WIDTH, HEIGHT);
+    }
+
+    function initLights() {
+        var light = new THREE.AmbientLight(0xffffff);
+        scene.add(light);
+    }
+
+    var mesh = null;
+    function initMesh() {
+        var loader = new THREE.JSONLoader();
+        loader.load( "garra.js", function(geometry){
+          var material = new THREE.MeshLambertMaterial({color: 0x55B663});
+          mesh = new THREE.Mesh(geometry, material);
+          scene.add(mesh);
+        });
+    }
+
+    function rotateMesh() {
+        if (!mesh) {
+            return;
+        }
+
+        mesh.rotation.x -= SPEED * 2;
+        mesh.rotation.y -= SPEED;
+        mesh.rotation.z -= SPEED * 3;
+    }
+
+    function render() {
+        requestAnimationFrame(render);
+        rotateMesh();
+        renderer.render(scene, camera);
+    }
+
+    init();
+    render();   
+
+
+/*
+    var scene, camera, renderer;
+
+    var WIDTH  = window.innerWidth;
+    var HEIGHT = window.innerHeight;
+
+    var SPEED = 0.01;
+
+    function init() {
+        scene = new THREE.Scene();
+
+        //initCube();
+        initMesh();
+        initCamera();
+        initRenderer();
+
+        document.body.appendChild(renderer.domElement);
+    }
+
+    function initCamera() {
+        camera = new THREE.PerspectiveCamera(70, WIDTH / HEIGHT, 1, 10);
+        camera.position.set(0, 3.5, 5);
+        camera.lookAt(scene.position);
+    }
+
+    function initRenderer() {
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(WIDTH, HEIGHT);
+    }
+
+    function initCube() {
+        cube = new THREE.Mesh(new THREE.CubeGeometry(2, 2, 2), new THREE.MeshNormalMaterial());
+        scene.add(cube);
+    }
+
+    var mesh = null;
+    function initMesh() {
+        var loader = new THREE.JSONLoader();
+        loader.load( "lego.js", function(geometry){
+          var material = new THREE.MeshLambertMaterial({color: 0x55B663});
+          mesh = new THREE.Mesh(geometry, material);
+          scene.add(mesh);
+        });
+    }
+
+    function render() {
+        requestAnimationFrame(render);
+        rotateMesh();
+        renderer.render(scene, camera);
+    }
+
+    init();
+    render(); 
+*/
+</script>-->
+</body>
+</html>

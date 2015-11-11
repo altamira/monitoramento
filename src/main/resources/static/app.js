@@ -1,7 +1,7 @@
 /* global angular,hljs */
 (function () {
     var monitor = angular.module('monitor', ['ngRoute']);
-
+                          
     // Global stuff
     monitor.directive('active', function ($location) {
         return {
@@ -47,13 +47,21 @@
         }
     });
 
-    // menu services
+    // maquina services
     monitor.service('MaquinaService', function ($http) {
     	this.getAll = function () {
             return $http.get('/maquinas');
         }
+    	this.get = function (id) {
+            return $http.get('/maquinas?codigo=' + id);
+        }
     });
+    
+    monitor.controller('MaquinaCtrl', ['MaquinaService', '$scope','$routeParams', function (MaquinaService, $scope, $routeParams) {
 
+    }]);
+    
+    // menu services
     monitor.controller('MenuCtrl', function (MaquinaService, $scope) {
     	var self = this;
         self.options = [];
@@ -76,7 +84,7 @@
         
         function initView() {
 
-            var sock = new SockJS('/notify');
+            var sock = new SockJS('/api/notify');
             sock.onmessage = function (response) {
                 var msg = JSON.parse(response.data);
 
@@ -153,20 +161,36 @@
     monitor.filter('statusClass', function () {
         return function (input) {
             switch (input) {
-            case 0: return 'badge badge-danger';
-            case 1: return 'label label-info';
-            case 2: return 'label label-success';
-            case 3: return 'label label-info';
-            case 4: return 'label label-info';
-            case 5: return 'badge badge-danger';
-            case 6: return 'label label-info';
-            case 7: return 'label label-warning';
-            case 99: return 'badge badge-danger';
+            case 0: return 'danger';
+            case 1: return 'success';
+            case 2: return 'info';
+            case 3: return 'info';
+            case 4: return 'info';
+            case 5: return 'danger';
+            case 6: return 'success';
+            case 7: return 'warning';
+            case 99: return 'warning';
             }
         }
     });
-    
-    monitor.filter('modoOperacao', function () {
+
+    monitor.filter('statusPanelClass', function () {
+        return function (input) {
+            switch (input) {
+            case 0: return 'panel-danger';
+            case 1: return 'panel-success';
+            case 2: return 'panel-info';
+            case 3: return 'panel-info';
+            case 4: return 'panel-info';
+            case 5: return 'panel-danger';
+            case 6: return 'panel-success';
+            case 7: return 'panel-warning';
+            case 99: return 'panel-warning';
+            }
+        }
+    });   
+
+    monitor.filter('statusName', function () {
         return function (input) {
             switch (input) {
             case 0: return 'Parada Indeterminado';
@@ -314,15 +338,52 @@
         });
     });
 
+    monitor.controller('DashboardCtrl', ['MaquinaService', '$scope','$routeParams', function (MaquinaService, $scope, $routeParams) {
+        var self = this;
+        self.maquinas = [];
+        self.count = 0;
+
+        function refresh() {
+            MaquinaService.getAll().then(function (response) {
+                self.maquinas = response.data._embedded.maquinas;
+            });
+        }
+
+        refresh();
+        
+        function initView() {
+
+            var sock = new SockJS('http://127.0.0.1:8080/api/notify');
+            sock.onmessage = function (response) {
+                var msg = JSON.parse(response.data);
+
+                for( var i = 0; i < self.maquinas.length; ++i ) {
+                    if (self.maquinas[i].codigo == msg.data.maquina) {
+                        self.maquinas[i].tempo = msg.data.tempo;
+                        self.maquinas[i].situacao = msg.data.modo;
+                        self.maquinas[i].operador = msg.data.operador;
+                    }
+                }
+                
+                $scope.$apply();
+            };
+        };
+
+        initView(); 
+    }]);
+    
     monitor.config(function ($routeProvider) {
-        $routeProvider.when('/home', {templateUrl: 'pages/home.tpl.html'});
-        $routeProvider.when('/sqs', {templateUrl: 'pages/sqs.tpl.html'});
-        $routeProvider.when('/sns', {templateUrl: 'pages/sns.tpl.html'});
-        $routeProvider.when('/elasticache', {templateUrl: 'pages/elasticache.tpl.html'});
-        $routeProvider.when('/rds', {templateUrl: 'pages/rds.tpl.html'});
-        $routeProvider.when('/ec2', {templateUrl: 'pages/ec2.tpl.html'});
-        $routeProvider.when('/main', {templateUrl: 'pages/main.tpl.html'});
-        $routeProvider.otherwise({redirectTo: '/home'});
+        $routeProvider.when('/home', {templateUrl: '/pages/home.tpl.html'});
+        $routeProvider.when('/index', {templateUrl: '/template/index.html'});
+        $routeProvider.when('/sqs', {templateUrl: '/pages/sqs.tpl.html'});
+        $routeProvider.when('/sns', {templateUrl: '/pages/sns.tpl.html'});
+        $routeProvider.when('/elasticache', {templateUrl: '/pages/elasticache.tpl.html'});
+        $routeProvider.when('/rds', {templateUrl: '/pages/rds.tpl.html'});
+        $routeProvider.when('/ec2', {templateUrl: '/pages/ec2.tpl.html'});
+        $routeProvider.when('/main', {templateUrl: '/pages/main.tpl.html'});
+        $routeProvider.when('/dashboard', {templateUrl: '/pages/dashboard.html'});
+        $routeProvider.when('/maquina/:id', {templateUrl: '/pages/maquina.html'});
+        $routeProvider.otherwise({redirectTo: '/dashboard'});
         //$routeProvider.otherwise({redirectTo: '/main'});
     });
 }());

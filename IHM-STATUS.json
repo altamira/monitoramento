@@ -1,11 +1,11 @@
 0. MENSAGEM DE STATUS
 
 {
-"ihm": "IHMVIGAMEZ",
+"ihm": "IHMCOLMEZ",
 "datahora": "2015-10-29T12:25:43-0400",
-"operador": "UTIKAWA",
-"modo": 3,
-"tempo": 447,
+"operador": "MARCELO MIRANDA",
+"modo": 1,
+"tempo": 23,
 "parametros": 
       [
         { "medida": "torque_medio", "unidade": "%", "valor": 80},

@@ -25,7 +25,7 @@
                 <tr ng-repeat="row in sqs.responses">
                     <td>{{ row.timestamp | date : 'mediumTime' }}</td>
                     <td>{{ row.data.ihm }}</td>
-                    <td>{{ row.data.modo | modoOperacao }}</td>
+                    <td>{{ row.data.modo | statusName }}</td>
                     <td>{{ row.data.operador }}</td>
                     <td>{{ row.data.tempo }}</td>
                 </tr>

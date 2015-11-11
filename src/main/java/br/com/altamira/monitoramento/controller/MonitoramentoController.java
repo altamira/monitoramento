@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import br.com.altamira.monitoramento.model.IHM;
 import br.com.altamira.monitoramento.model.IHMLog;
@@ -29,6 +30,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Controller
+@RequestMapping("/api/monitor")
 public class MonitoramentoController {
 
 	@Autowired
@@ -67,8 +69,11 @@ public class MonitoramentoController {
 			
 			ihm = new IHM(statusMsg.getIHM());
 		
-			ihmRepository.saveAndFlush(ihm);
 		}
+		
+		ihm.setOperador(statusMsg.getOperador());
+		
+		ihmRepository.saveAndFlush(ihm);
 		
 		System.out.println(String.format(
 				"\n--------------------------------------------------------------------------------\nCHEGOU MENSAGEM DE IHM-STATUS\n--------------------------------------------------------------------------------\n%s\n--------------------------------------------------------------------------------\n", msg));
@@ -99,6 +104,7 @@ public class MonitoramentoController {
 			
 			maquina.setSituacao(statusMsg.getModo());
 			maquina.setTempo(statusMsg.getTempo());
+			maquina.setOperador(statusMsg.getOperador());
 		
 			maquinaRepository.saveAndFlush(maquina);
 			
@@ -136,7 +142,6 @@ public class MonitoramentoController {
         } catch (IOException e) {
         	System.out.println(String.format("\n********************************************************************************\nWas not able to push the message to the client.\n********************************************************************************\n%s\n********************************************************************************\n", e.getMessage()));
         }
-	
 		
 	}
 	

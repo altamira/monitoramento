@@ -21,7 +21,10 @@ public class IHM {
 	
 	@Column(name = "MAQUINA")
 	private String maquina;
-
+	
+	@Column(name = "OPERADOR")
+	private String operador;
+	
 	public IHM() {
 		super();
 	}
@@ -69,6 +72,14 @@ public class IHM {
 
 	public void setMaquina(String maquina) {
 		this.maquina = maquina;
+	}
+
+	public String getOperador() {
+		return operador;
+	}
+
+	public void setOperador(String operador) {
+		this.operador = operador;
 	}
 		
 }

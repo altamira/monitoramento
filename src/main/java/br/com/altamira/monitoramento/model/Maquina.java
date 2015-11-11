@@ -24,7 +24,10 @@ public class Maquina {
 	
 	@Column(name = "TEMPO")
 	private int tempo;
-
+	
+	@Column(name = "OPERADOR")
+	private String operador;
+	
 	public String getCodigo() {
 		return codigo;
 	}
@@ -63,6 +66,14 @@ public class Maquina {
 
 	public void setTempo(int tempo) {
 		this.tempo = tempo;
+	}
+
+	public String getOperador() {
+		return operador;
+	}
+
+	public void setOperador(String operador) {
+		this.operador = operador;
 	}
 		
 }
