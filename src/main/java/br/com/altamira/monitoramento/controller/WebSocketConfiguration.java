@@ -33,7 +33,7 @@ public class WebSocketConfiguration implements WebSocketConfigurer {
      */
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(ReceivingMessageHandler(), "/api/notify").withSockJS();
+        registry.addHandler(ReceivingMessageHandler(), "/api/notify").setAllowedOrigins("*").withSockJS();
     }
 
     /**

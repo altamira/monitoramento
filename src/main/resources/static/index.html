@@ -328,7 +328,7 @@ Use search to find needed section.
 							<li class="dropdown">
 								<a href="#" class="dropdown-toggle user-menu" data-toggle="dropdown">
 									<img src="assets/demo/avatars/1.jpg" alt="">
-									<span>John Doe</span>
+									<span>Usuario</span>
 								</a>
 								<ul class="dropdown-menu">
 									<li><a href="#">Profile <span class="label label-warning pull-right">new</span></a></li>
@@ -395,7 +395,7 @@ Use search to find needed section.
 					<ul>
 						<!-- inicio do menu lateral dinamico -->
 						<li ng-repeat="item in menu.options">
-							<a tabindex="-1" href="#/maq?{{ item.codigo }}"><span class="mm-text">{{ item.nome }}</span><span class="badge badge-{{ item.situacao | statusClass }}">{{ item.tempo }}s</span></a>
+							<a tabindex="-1" href="#/maquina/{{ item.codigo }}"><span class="mm-text">{{ item.nome }}</span><span class="badge badge-{{ item.situacao | statusClass }}">{{ item.tempo }}</span></a>
 						</li>
 						<!-- <li>
 							<a tabindex="-1" href="#"><span class="mm-text">Porta Palete Normal</span><span class="badge badge-danger">15h 12m</span></a>

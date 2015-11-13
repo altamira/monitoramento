@@ -52,13 +52,57 @@
     	this.getAll = function () {
             return $http.get('/maquinas');
         }
-    	this.get = function (id) {
-            return $http.get('/maquinas?codigo=' + id);
+    	this.get = function (codigo) {
+            return $http.get('/maquinas/' + codigo);
+        }
+        this.getLog = function (codigo) {
+            return $http.get('/maquinas/' + codigo);
         }
     });
     
     monitor.controller('MaquinaCtrl', ['MaquinaService', '$scope','$routeParams', function (MaquinaService, $scope, $routeParams) {
+        var self = this;
+        self.data = {};
 
+        function refresh() {
+            MaquinaService.get($routeParams.codigo).then(function (response) {
+                self.data = response.data;
+                self.data.log = [];
+                MaquinaService.get($routeParams.codigo).then(function (response) {
+                    self.data = response.data;
+                    self.data.log = [];
+                });
+            });
+        }
+
+        refresh();
+
+        function initView() {
+
+            var sock = new SockJS('/api/notify');
+            sock.onmessage = function (response) {
+                var msg = JSON.parse(response.data);
+
+                if (self.data.codigo == msg.data.maquina) {
+                    self.data.tempo = msg.data.tempoFormatado;
+                    self.data.situacao = msg.data.modo;
+                    self.data.operador = msg.data.operador;
+
+                    self.data.log.reverse().push(msg);
+
+                    if (self.data.log.length > 10) {
+                        self.data.log = self.data.log.slice(self.data.log.length - 10);
+                    }
+
+                    self.data.log = self.data.log.reverse();
+
+                    $scope.$apply();
+                }
+
+            };
+        }
+
+        initView();          
     }]);
     
     // menu services
@@ -76,6 +120,27 @@
                 		self.options[i].situacao == '99') {
                 		self.count++;
                 	}
+
+                    var segundos = parseInt(self.options[i].tempo, 10); 
+                    var segundo = parseInt(segundos % 60, 10); 
+                    var minutos = parseInt(segundos / 60, 10); 
+                    var minuto = parseInt(minutos % 60, 10); 
+                    var horas = parseInt(minutos / 60, 10);
+                    var hora = parseInt(horas % 60, 10);
+                    var dias = parseInt(horas / 24, 10); 
+                    var dia = parseInt(dias % 24, 10);
+                    
+                    if (dia > 1) {
+                        self.options[i].tempo = dia + ' dias'
+                    } else if (dia == 1) {
+                        self.options[i].tempo = dia + ' dia'
+                    } else if (hora > 0) {
+                        self.options[i].tempo = hora + ' h'
+                    } else if (minuto > 0) {
+                        self.options[i].tempo = minuto + ' min'
+                    } else {
+                        self.options[i].tempo = segundo + ' s';
+                    }
                 }
             });
         }
@@ -90,8 +155,28 @@
 
                 for( var i = 0; i < self.options.length; ++i ) {
                 	if (self.options[i].codigo == msg.data.maquina) {
-                		self.options[i].tempo = msg.data.tempo;
                 		self.options[i].situacao = msg.data.modo;
+
+                        var segundos = parseInt(msg.data.tempo, 10); 
+                        var segundo = parseInt(segundos % 60, 10); 
+                        var minutos = parseInt(segundos / 60, 10); 
+                        var minuto = parseInt(minutos % 60, 10); 
+                        var horas = parseInt(minutos / 60, 10);
+                        var hora = parseInt(horas % 60, 10);
+                        var dias = parseInt(horas / 24, 10); 
+                        var dia = parseInt(dias % 24, 10);
+                        
+                        if (dia > 1) {
+                            self.options[i].tempo = dia + ' dias'
+                        } else if (dia == 1) {
+                            self.options[i].tempo = dia + ' dia'
+                        } else if (hora > 0) {
+                            self.options[i].tempo = hora + ' h'
+                        } else if (minuto > 0) {
+                            self.options[i].tempo = minuto + ' min'
+                        } else {
+                            self.options[i].tempo = segundo + ' s';
+                        }
                 	}
                 }
                 
@@ -199,7 +284,7 @@
             case 3: return 'Manual';
             case 4: return 'Preparacao';
             case 5: return 'Manutencao';
-            case 6: return 'Maq. Desligada';
+            case 6: return 'Maquina Desligada';
             case 7: return 'IHM Desligada';
             case 99: return 'Falha Comunicacao';
             }
@@ -346,6 +431,30 @@
         function refresh() {
             MaquinaService.getAll().then(function (response) {
                 self.maquinas = response.data._embedded.maquinas;
+
+                for( var i = 0; i < self.maquinas.length; ++i ) {
+
+                    var segundos = parseInt(self.maquinas[i].tempo, 10); 
+                    var segundo = parseInt(segundos % 60, 10); 
+                    var minutos = parseInt(segundos / 60, 10); 
+                    var minuto = parseInt(minutos % 60, 10); 
+                    var horas = parseInt(minutos / 60, 10);
+                    var hora = parseInt(horas % 60, 10);
+                    var dias = parseInt(horas / 24, 10); 
+                    var dia = parseInt(dias % 24, 10);
+                    
+                    if (dia > 1) {
+                        self.maquinas[i].tempo = dia + ' dias'
+                    } else if (dia == 1) {
+                        self.maquinas[i].tempo = dia + ' dia'
+                    } else if (hora > 0) {
+                        self.maquinas[i].tempo = hora + ' h'
+                    } else if (minuto > 0) {
+                        self.maquinas[i].tempo = minuto + ' min'
+                    } else {
+                        self.maquinas[i].tempo = segundo + ' s';
+                    }
+                }
             });
         }
 
@@ -359,9 +468,30 @@
 
                 for( var i = 0; i < self.maquinas.length; ++i ) {
                     if (self.maquinas[i].codigo == msg.data.maquina) {
-                        self.maquinas[i].tempo = msg.data.tempo;
+                        //self.maquinas[i].tempo = msg.data.tempoFormatado;
                         self.maquinas[i].situacao = msg.data.modo;
                         self.maquinas[i].operador = msg.data.operador;
+
+                        var segundos = parseInt(msg.data.tempo, 10); 
+                        var segundo = parseInt(segundos % 60, 10); 
+                        var minutos = parseInt(segundos / 60, 10); 
+                        var minuto = parseInt(minutos % 60, 10); 
+                        var horas = parseInt(minutos / 60, 10);
+                        var hora = parseInt(horas % 60, 10);
+                        var dias = parseInt(horas / 24, 10); 
+                        var dia = parseInt(dias % 24, 10);
+                        
+                        if (dia > 1) {
+                            self.maquinas[i].tempo = dia + ' dias'
+                        } else if (dia == 1) {
+                            self.maquinas[i].tempo = dia + ' dia'
+                        } else if (hora > 0) {
+                            self.maquinas[i].tempo = hora + ' h'
+                        } else if (minuto > 0) {
+                            self.maquinas[i].tempo = minuto + ' min'
+                        } else {
+                            self.maquinas[i].tempo = segundo + ' s';
+                        }
                     }
                 }
                 
@@ -382,7 +512,7 @@
         $routeProvider.when('/ec2', {templateUrl: '/pages/ec2.tpl.html'});
         $routeProvider.when('/main', {templateUrl: '/pages/main.tpl.html'});
         $routeProvider.when('/dashboard', {templateUrl: '/pages/dashboard.html'});
-        $routeProvider.when('/maquina/:id', {templateUrl: '/pages/maquina.html'});
+        $routeProvider.when('/maquina/:codigo', {templateUrl: '/pages/maquina.html'});
         $routeProvider.otherwise({redirectTo: '/dashboard'});
         //$routeProvider.otherwise({redirectTo: '/main'});
     });

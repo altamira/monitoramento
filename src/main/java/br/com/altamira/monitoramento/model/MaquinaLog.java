@@ -27,6 +27,10 @@ public class MaquinaLog {
 	
 	@Column(name = "MAQUINA")
 	private String maquina;
+
+	@Column(name = "RECEBIDOEM", insertable = false, updatable = false)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date recebidoEm;
 	
 	@Column(name = "DATAHORA")
 	@Temporal(TemporalType.TIMESTAMP)
@@ -43,6 +47,10 @@ public class MaquinaLog {
 	
 	@OneToMany(mappedBy = "maquinaLog", fetch = FetchType.LAZY/*, cascade = CascadeType.DETACH*/)
 	private Set<MaquinaLogParametro> parametros;
+
+	public MaquinaLog() {
+		super();
+	}
 
 	public MaquinaLog(String maquina, Date datahora, int modo, int tempo, String operador) {
 		super();
@@ -67,6 +75,14 @@ public class MaquinaLog {
 
 	public void setMaquina(String maquina) {
 		this.maquina = maquina;
+	}
+
+	public Date getRecebidoEm() {
+		return recebidoEm;
+	}
+
+	public void setRecebidoEm(Date recebidoEm) {
+		this.recebidoEm = recebidoEm;
 	}
 
 	public Date getDatahora() {

@@ -28,6 +28,10 @@ public class Maquina {
 	@Column(name = "OPERADOR")
 	private String operador;
 	
+	public Maquina() {
+		super();
+	}
+
 	public String getCodigo() {
 		return codigo;
 	}

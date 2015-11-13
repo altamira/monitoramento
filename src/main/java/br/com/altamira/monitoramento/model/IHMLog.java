@@ -24,6 +24,10 @@ public class IHMLog {
 	
 	@Column(name = "IHM")
 	private String ihm;
+
+	@Column(name = "RECEBIDOEM", insertable = false, updatable = false)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date recebidoEm;
 	
 	@Column(name = "DATAHORA")
 	@Temporal(TemporalType.TIMESTAMP)
@@ -37,6 +41,10 @@ public class IHMLog {
 	
 	@Column(name = "OPERADOR")
 	private String operador;
+
+	public IHMLog() {
+		super();
+	}
 
 	public IHMLog(String ihm, Date datahora, int modo, int tempo, String operador) {
 		super();
@@ -61,6 +69,14 @@ public class IHMLog {
 
 	public void setIHM(String ihm) {
 		this.ihm = ihm;
+	}
+
+	public Date getRecebidoEm() {
+		return recebidoEm;
+	}
+
+	public void setRecebidoEm(Date recebidoEm) {
+		this.recebidoEm = recebidoEm;
 	}
 
 	public Date getDatahora() {

@@ -14,6 +14,8 @@ import org.springframework.jms.connection.CachingConnectionFactory;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 
+import br.com.altamira.monitoramento.controller.MonitorScheduler;
+
 @SpringBootApplication
 @EnableJms
 @EnableWebSocket
@@ -56,4 +58,8 @@ public class Application {
 		transactionManager.setEntityManagerFactory(emf);
 		return transactionManager;
 	}*/
+    
+    @Bean MonitorScheduler monitorScheduler() {
+    	return new MonitorScheduler();
+    }
 }

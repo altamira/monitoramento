@@ -17,6 +17,8 @@ public class StatusMsg {
 	
 	private int tempo;
 	
+	private String tempoFormatado;
+	
 	private List<ParametroMsg> parametros;
 
 	public String getIHM() {
@@ -65,6 +67,32 @@ public class StatusMsg {
 
 	public void setTempo(int tempo) {
 		this.tempo = tempo;
+	}
+
+	public String getTempoFormatado() {
+		return tempoFormatado;
+	}
+
+	public void setTempoFormatado(int segundos) {
+		int segundo = segundos % 60; 
+		int minutos = segundos / 60; 
+		int minuto = minutos % 60; 
+		int horas = minutos / 60;
+		int hora = horas % 60;
+		int dias = horas / 24; 
+		int dia = dias % 24;
+		
+		if (dia > 1) {
+			this.tempoFormatado = String.format("%d dias", dia);
+		} else if (dia == 1) {
+			this.tempoFormatado = String.format("%d dia", dia);
+		} else if (hora > 0) {
+			this.tempoFormatado = String.format("%d h", hora);
+		} else if (minuto > 0) {
+			this.tempoFormatado = String.format("%d min", minuto);
+		} else {
+			this.tempoFormatado = String.format("%d s", segundo);
+		}
 	}
 
 	public List<ParametroMsg> getParametros() {
