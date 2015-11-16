@@ -19,10 +19,12 @@
 		    <div class="col-md-4 col-xs-12 col-sm-4" ng-repeat="maquina in dash.maquinas">
 		    	<div class="panel {{ maquina.situacao | statusPanelClass }} panel-dark widget-profile">
 					<div class="panel-heading">
+						<a tabindex="-1" href="#/maquina/{{ maquina.codigo }}">
 						<div class="widget-profile-header">
 							<span><b>{{ maquina.nome }}</b></span><br>
 							{{ maquina.situacao | statusName }}
 						</div>
+						</a>
 					</div> <!-- / .panel-heading -->
 					<div class="widget-profile-counters">
 						<div class="col-xs-3"><span>{{ maquina.tempo }}</span><br>tempo</div>

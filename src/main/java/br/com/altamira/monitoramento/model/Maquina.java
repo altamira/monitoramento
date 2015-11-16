@@ -1,9 +1,13 @@
 package br.com.altamira.monitoramento.model;
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 @Entity
 @Table(name = "MAQUINA")
@@ -27,6 +31,13 @@ public class Maquina {
 	
 	@Column(name = "OPERADOR")
 	private String operador;
+	
+	@Column(name = "ATIVO")
+	private Boolean ativo;
+	
+	@Column(name = "ULTIMA_ATUALIZACAO")
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date atualizacao;
 	
 	public Maquina() {
 		super();
@@ -78,6 +89,22 @@ public class Maquina {
 
 	public void setOperador(String operador) {
 		this.operador = operador;
+	}
+
+	public Boolean getAtivo() {
+		return ativo;
+	}
+
+	public void setAtivo(Boolean ativo) {
+		this.ativo = ativo;
+	}
+
+	public Date getAtualizacao() {
+		return atualizacao;
+	}
+
+	public void setAtualizacao(Date atualizacao) {
+		this.atualizacao = atualizacao;
 	}
 		
 }

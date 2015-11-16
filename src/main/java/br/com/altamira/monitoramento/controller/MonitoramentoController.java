@@ -7,7 +7,6 @@ import java.util.HashSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.annotation.JmsListener;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -107,6 +106,7 @@ public class MonitoramentoController {
 			maquina.setSituacao(statusMsg.getModo());
 			maquina.setTempo(statusMsg.getTempo());
 			maquina.setOperador(statusMsg.getOperador());
+			maquina.setAtualizacao(new Date());
 		
 			maquinaRepository.saveAndFlush(maquina);
 			
@@ -136,8 +136,6 @@ public class MonitoramentoController {
 			}
 			
 		}
-		
-		statusMsg.setTempoFormatado(statusMsg.getTempo());
 		
 		String approximateFirstReceiveTimestamp = String.valueOf(new Date().getTime());
 		

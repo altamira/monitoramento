@@ -1,9 +1,91 @@
 /* global angular,hljs */
 (function () {
-    var monitor = angular.module('monitor', ['ngRoute']);
-                          
+    var module = angular.module('monitor', ['ngRoute']);
+                     
+    module.directive('areachart', function ($window) {
+
+        return {
+            restrict: 'E',
+            template: '<div></div>',
+            replace: true,
+            link: function ($scope, element, attrs) {
+                var morris;
+                angular.element($window).bind('resize', function () {
+                    if (morris) {
+                        //console.log('morris resized');
+                        morris.redraw();
+                    }
+                });
+
+                attrs.$observe('value', function (val) {
+                    if (!morris) {
+                        console.log('creating chart');
+                        morris = Morris.Bar({
+                            element: element,
+                            data: angular.fromJson(val),
+                            xkey: $scope[attrs.xkey],
+                            ykeys: $scope[attrs.ykeys],
+                            labels: $scope[attrs.labels],
+                            lineColors: ['#fff'],
+                            lineWidth: 2,
+                            pointSize: 4,
+                            gridLineColor: 'rgba(255,255,255,.5)',
+                            resize: true,
+                            gridTextColor: '#fff',
+                            barColors: function (row, series, type) {
+                                //console.log("--> "+row.label, series, type);
+                                if(row.x == "0") return "#AD1D28";
+                                else if(row.x == "1") return "#DEBB27";
+                                else if(row.x == "2") return "#fec04c";
+                                else if(row.x == "3") return "#1AB244";
+                                else if(row.x == "4") return "#1AB444";
+                                else if(row.x == "5") return "#1ABf44";
+                                else if(row.x == "6") return "#3AB244";
+                                else if(row.x == "7") return "#1cB244";
+                                else if(row.x == "99") return "#4AB144";
+                            }
+                        });
+                    } else {
+                        //console.log('setting chart values');
+                        morris.setData(angular.fromJson(val));
+                    }
+                });
+            }
+        };
+    });
+
+    module.directive('barchart', function() {
+
+        return {
+
+            // required to make it work as an element
+            restrict: 'E',
+            template: '<div></div>',
+            replace: true,
+            // observe and manipulate the DOM
+            link: function($scope, element, attrs) {
+
+                var data = $scope[attrs.data],
+                    xkey = $scope[attrs.xkey],
+                    ykeys= $scope[attrs.ykeys],
+                    labels= $scope[attrs.labels];
+
+                Morris.Bar({
+                        element: element,
+                        data: data,
+                        xkey: xkey,
+                        ykeys: ykeys,
+                        labels: labels
+                    });
+
+            }
+
+        };
+
+    });
+
     // Global stuff
-    monitor.directive('active', function ($location) {
+    module.directive('active', function ($location) {
         return {
             link: function (scope, element) {
                 function makeActiveIfMatchesCurrentPath() {
@@ -21,13 +103,13 @@
         };
     });
 
-    monitor.service('SourceCodeService', function ($http) {
+    module.service('SourceCodeService', function ($http) {
         this.getSourceCode = function (path) {
-            return $http.get('source?path=' + path);
+            return $http.get('http://192.168.0.212:8080source?path=' + path);
         };
     });
 
-    monitor.directive('sourceCode', function (SourceCodeService, $timeout) {
+    module.directive('sourceCode', function (SourceCodeService, $timeout) {
         return {
             restrict: 'E',
             templateUrl: 'templates/source-box.tpl.html',
@@ -48,29 +130,64 @@
     });
 
     // maquina services
-    monitor.service('MaquinaService', function ($http) {
+    module.service('MaquinaService', function ($http) {
     	this.getAll = function () {
-            return $http.get('/maquinas');
+            return $http.get('http://192.168.0.212:8080/maquinas/search/findAllByAtivo?ativo=true');
         }
     	this.get = function (codigo) {
-            return $http.get('/maquinas/' + codigo);
+            return $http.get('http://192.168.0.212:8080/maquinas/' + codigo);
         }
         this.getLog = function (codigo) {
-            return $http.get('/maquinas/' + codigo);
+            return $http.get('http://192.168.0.212:8080/maquinaLogs/search/findAllByMaquina?maquina=' + codigo + '&page=1&size=20&sort=datahora,desc');
+        }
+        this.getSumario = function(codigo) {
+            return $http.get('http://192.168.0.212:8080/sumarios/search/findByMaquina?maquina=' + codigo);
         }
     });
     
-    monitor.controller('MaquinaCtrl', ['MaquinaService', '$scope','$routeParams', function (MaquinaService, $scope, $routeParams) {
+    module.controller('MaquinaCtrl', ['MaquinaService', '$scope','$routeParams', function (MaquinaService, $scope, $routeParams) {
         var self = this;
         self.data = {};
+        self.total = 0;  
+
+        $scope.xkey = 'descricao';
+
+        $scope.ykeys = ['percentual'];
+
+        $scope.labels = ['%'];
+
+        $scope.myModel = [
+        /*{ descricao: 'Ociosa', tempo: 20 },
+        { descricao: 'Preparacao', tempo: 35 },
+        { descricao: 'Producao', tempo: 20 },
+        { descricao: 'Manual', tempo: 20 }*/
+        ];
 
         function refresh() {
             MaquinaService.get($routeParams.codigo).then(function (response) {
                 self.data = response.data;
                 self.data.log = [];
-                MaquinaService.get($routeParams.codigo).then(function (response) {
-                    self.data = response.data;
-                    self.data.log = [];
+                self.data.sumario = [];
+                MaquinaService.getLog($routeParams.codigo).then(function (response) {
+                    if (response.data.page.totalElements > 0) {
+                        self.data.log = response.data._embedded.maquinaLogs;    
+                    }
+                });
+                MaquinaService.getSumario($routeParams.codigo).then(function (response) {
+                    if (response.data._embedded) {
+                        $scope.myModel = response.data._embedded.sumarios; 
+                        self.data.sumario = response.data._embedded.sumarios; 
+                        for( var i = 0; i < self.data.sumario.length; ++i ) {
+                            /*if (self.data.sumario[i].tempo > 60 * 60 * 10) {
+                                self.data.sumario[i].tempo = 60 * 60 * 10;
+                            }*/
+                            self.total += self.data.sumario[i].tempo;
+                        }
+                        for( var i = 0; i < self.data.sumario.length; ++i ) {
+                             self.data.sumario[i].percentual = (self.data.sumario[i].tempo / self.total) * 100;
+                             self.data.sumario[i].percentual = self.data.sumario[i].percentual.toFixed(2);
+                        }
+                    }
                 });
             });
         }
@@ -79,19 +196,19 @@
 
         function initView() {
 
-            var sock = new SockJS('/api/notify');
+            var sock = new SockJS('http://192.168.0.212:8080/api/notify');
             sock.onmessage = function (response) {
                 var msg = JSON.parse(response.data);
 
                 if (self.data.codigo == msg.data.maquina) {
-                    self.data.tempo = msg.data.tempoFormatado;
+                    self.data.tempo = msg.data.tempo;
                     self.data.situacao = msg.data.modo;
                     self.data.operador = msg.data.operador;
 
-                    self.data.log.reverse().push(msg);
+                    self.data.log.reverse().push(msg.data);
 
-                    if (self.data.log.length > 10) {
-                        self.data.log = self.data.log.slice(self.data.log.length - 10);
+                    if (self.data.log.length > 20) {
+                        self.data.log = self.data.log.slice(self.data.log.length - 20);
                     }
 
                     self.data.log = self.data.log.reverse();
@@ -106,7 +223,7 @@
     }]);
     
     // menu services
-    monitor.controller('MenuCtrl', function (MaquinaService, $scope) {
+    module.controller('MenuCtrl', function (MaquinaService, $scope) {
     	var self = this;
         self.options = [];
         self.count = 0;
@@ -149,7 +266,7 @@
         
         function initView() {
 
-            var sock = new SockJS('/api/notify');
+            var sock = new SockJS('http://192.168.0.212:8080/api/notify');
             sock.onmessage = function (response) {
                 var msg = JSON.parse(response.data);
 
@@ -200,13 +317,13 @@
     // end menu services
     
     // SQS
-    monitor.service('SqsService', function ($http) {
+    module.service('SqsService', function ($http) {
         this.sendMessage = function (message) {
             return $http.post('sqs/message-processing-queue', message);
         };
     });
 
-    monitor.controller('SqsCtrl', function (SqsService, $scope) {
+    module.controller('SqsCtrl', function (SqsService, $scope) {
         var self = this;
         self.model = {};
         self.responses = [];
@@ -226,7 +343,7 @@
         function initView() {
             initMessageToProcess();
 
-            var sock = new SockJS('/notify');
+            var sock = new SockJS('http://192.168.0.212:8080/notify');
             sock.onmessage = function (e) {
                 var jsonResponse = JSON.parse(e.data);
                 self.responses.reverse().push(jsonResponse);
@@ -243,7 +360,7 @@
         initView();
     });
 
-    monitor.filter('statusClass', function () {
+    module.filter('statusClass', function () {
         return function (input) {
             switch (input) {
             case 0: return 'danger';
@@ -254,12 +371,12 @@
             case 5: return 'danger';
             case 6: return 'success';
             case 7: return 'warning';
-            case 99: return 'warning';
+            case 99: return 'danger';
             }
         }
     });
 
-    monitor.filter('statusPanelClass', function () {
+    module.filter('statusPanelClass', function () {
         return function (input) {
             switch (input) {
             case 0: return 'panel-danger';
@@ -270,12 +387,12 @@
             case 5: return 'panel-danger';
             case 6: return 'panel-success';
             case 7: return 'panel-warning';
-            case 99: return 'panel-warning';
+            case 99: return 'panel-danger';
             }
         }
     });   
 
-    monitor.filter('statusName', function () {
+    module.filter('statusName', function () {
         return function (input) {
             switch (input) {
             case 0: return 'Parada Indeterminado';
@@ -289,9 +406,25 @@
             case 99: return 'Falha Comunicacao';
             }
         }
-    });    
-    
-    monitor.filter('priority', function () {
+    });   
+
+    module.filter('statusLabelClass', function () {
+        return function (input) {
+            switch (input) {
+            case 0: return 'label-danger';
+            case 1: return 'label-success';
+            case 2: return 'label-info';
+            case 3: return 'label-info';
+            case 4: return 'label-info';
+            case 5: return 'label-danger';
+            case 6: return 'label-success';
+            case 7: return 'label-warning';
+            case 99: return 'label-danger';
+            }
+        }
+    }); 
+
+    module.filter('priority', function () {
         return function (input) {
             switch (input) {
                 case 1:
@@ -305,13 +438,13 @@
     });
 
     // SNS
-    monitor.service('SnsService', function ($http) {
+    module.service('SnsService', function ($http) {
         this.send = function (message) {
             return $http.post('sns/send', message);
         };
     });
 
-    monitor.controller('SnsCtrl', function (SnsService, $scope) {
+    module.controller('SnsCtrl', function (SnsService, $scope) {
         var self = this;
         self.responses = [];
 
@@ -330,7 +463,7 @@
         function initView() {
             initModel();
 
-            var sock = new SockJS('/sns-messages');
+            var sock = new SockJS('http://192.168.0.212:8080/sns-messages');
             sock.onmessage = function (e) {
                 var jsonResponse = JSON.parse(e.data);
                 self.responses.reverse().push(jsonResponse);
@@ -348,17 +481,17 @@
     });
 
     // RDS
-    monitor.service('PersonService', function ($http) {
+    module.service('PersonService', function ($http) {
         this.add = function (person) {
             return $http.post('persons', person);
         };
 
         this.getAll = function () {
-            return $http.get('persons');
+            return $http.get('http://192.168.0.212:8080persons');
         }
     });
 
-    monitor.controller('RdsCtrl', function (PersonService) {
+    module.controller('RdsCtrl', function (PersonService) {
         var self = this;
         self.persons = [];
 
@@ -388,13 +521,13 @@
     });
 
     // ElastiCache
-    monitor.service('ElastiCacheService', function ($http) {
+    module.service('ElastiCacheService', function ($http) {
         this.getValue = function (key) {
-            return $http.get('cachedService?key=' + key, {headers: {Accept: 'text/plain'}});
+            return $http.get('http://192.168.0.212:8080cachedService?key=' + key, {headers: {Accept: 'text/plain'}});
         };
     });
 
-    monitor.controller('ElastiCacheCtrl', function ($scope, ElastiCacheService) {
+    module.controller('ElastiCacheCtrl', function ($scope, ElastiCacheService) {
         var self = this;
         self.loading = false;
 
@@ -409,13 +542,13 @@
     });
 
     // EC2
-    monitor.service('Ec2Service', function ($http) {
+    module.service('Ec2Service', function ($http) {
         this.getProperties = function () {
-            return $http.get('info');
+            return $http.get('http://192.168.0.212:8080info');
         };
     });
 
-    monitor.controller('Ec2Ctrl', function (Ec2Service) {
+    module.controller('Ec2Ctrl', function (Ec2Service) {
         var self = this;
 
         Ec2Service.getProperties().then(function (response) {
@@ -423,7 +556,7 @@
         });
     });
 
-    monitor.controller('DashboardCtrl', ['MaquinaService', '$scope','$routeParams', function (MaquinaService, $scope, $routeParams) {
+    module.controller('DashboardCtrl', ['MaquinaService', '$scope','$routeParams', function (MaquinaService, $scope, $routeParams) {
         var self = this;
         self.maquinas = [];
         self.count = 0;
@@ -462,7 +595,7 @@
         
         function initView() {
 
-            var sock = new SockJS('http://127.0.0.1:8080/api/notify');
+            var sock = new SockJS('http://192.168.0.212:8080http://127.0.0.1:8080/api/notify');
             sock.onmessage = function (response) {
                 var msg = JSON.parse(response.data);
 
@@ -502,7 +635,7 @@
         initView(); 
     }]);
     
-    monitor.config(function ($routeProvider) {
+    module.config(function ($routeProvider) {
         $routeProvider.when('/home', {templateUrl: '/pages/home.tpl.html'});
         $routeProvider.when('/index', {templateUrl: '/template/index.html'});
         $routeProvider.when('/sqs', {templateUrl: '/pages/sqs.tpl.html'});

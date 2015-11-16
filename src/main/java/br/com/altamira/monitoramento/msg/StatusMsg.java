@@ -1,5 +1,6 @@
 package br.com.altamira.monitoramento.msg;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -19,7 +20,22 @@ public class StatusMsg {
 	
 	private String tempoFormatado;
 	
-	private List<ParametroMsg> parametros;
+	private List<ParametroMsg> parametros = new ArrayList<ParametroMsg>();
+
+	public StatusMsg() {
+		super();
+	}
+
+	public StatusMsg(String ihm, String maquina, Date datahora,
+			String operador, int modo, int tempo) {
+		super();
+		this.ihm = ihm;
+		this.maquina = maquina;
+		this.datahora = datahora;
+		this.operador = operador;
+		this.modo = modo;
+		this.tempo = tempo;
+	}
 
 	public String getIHM() {
 		return ihm;
@@ -67,6 +83,7 @@ public class StatusMsg {
 
 	public void setTempo(int tempo) {
 		this.tempo = tempo;
+		setTempoFormatado(tempo);
 	}
 
 	public String getTempoFormatado() {

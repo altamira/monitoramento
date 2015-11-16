@@ -11,12 +11,14 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.connection.CachingConnectionFactory;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 
 import br.com.altamira.monitoramento.controller.MonitorScheduler;
 
 @SpringBootApplication
+@EnableScheduling
 @EnableJms
 @EnableWebSocket
 @EnableTransactionManagement
