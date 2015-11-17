@@ -39,6 +39,9 @@ public class MaquinaLog {
 	@Column(name = "MODO")
 	private int modo;
 	
+	@Column(name = "SEQUENCIA")
+	private long sequencia;
+	
 	@Column(name = "TEMPO")
 	private int tempo;
 	
@@ -52,11 +55,13 @@ public class MaquinaLog {
 		super();
 	}
 
-	public MaquinaLog(String maquina, Date datahora, int modo, int tempo, String operador) {
+	public MaquinaLog(String maquina, Date datahora, int modo, long sequencia,
+			int tempo, String operador) {
 		super();
 		this.maquina = maquina;
 		this.datahora = datahora;
 		this.modo = modo;
+		this.sequencia = sequencia;
 		this.tempo = tempo;
 		this.operador = operador;
 	}
@@ -107,6 +112,14 @@ public class MaquinaLog {
 
 	public void setOperador(String operador) {
 		this.operador = operador;
+	}
+
+	public long getSequencia() {
+		return sequencia;
+	}
+
+	public void setSequencia(long sequencia) {
+		this.sequencia = sequencia;
 	}
 
 	public int getTempo() {

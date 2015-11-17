@@ -1,10 +1,12 @@
 0. MENSAGEM DE STATUS
 
 {
-"ihm": "IHMCOLMEZ",
+"ihm": "IHMTESTE",
 "datahora": "2015-10-29T12:25:43-0400",
 "operador": "ADENILSON",
+"versao": "1234 17/11/2015 10:24:31",
 "modo": 1,
+"sequencia": 1234,
 "tempo": 23,
 "parametros": 
       [

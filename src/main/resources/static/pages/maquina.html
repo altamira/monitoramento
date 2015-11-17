@@ -8,52 +8,14 @@
 		
 		<div class="row">
 			<!-- Page header, center on small screens -->
-			<h1 class="col-xs-12 col-sm-4 text-center text-left-sm"><i class="fa fa-dashboard page-header-icon"></i>&nbsp;&nbsp;{{ maquina.data.nome }}</h1>
-
+			<h1 class="col-xs-12 col-sm-12 text-center text-left-sm"><i class="fa fa-dashboard page-header-icon"></i>&nbsp;&nbsp;{{ maquina.data.nome }}</h1>
+			<h5 ng-repeat="ihm in maquina.data.ihm" class="col-xs-12 col-sm-12 text-center text-left-sm">&nbsp;&nbsp;IHM versao: {{ ihm.versao }}</h5>
 		</div>
 	</div> <!-- / .page-header -->
 
 
 	<div class="row">
-		<div class="col-md-12 col-xs-12">
-
-<!-- 5. $UPLOADS_CHART =============================================================================
-
-			Uploads chart
--->
-			<!-- Javascript -->
-			<script>
-				init.push(function () {
-					var uploads_data = [
-						{ day: '2014-03-10', v: 20 },
-						{ day: '2014-03-11', v: 10 },
-						{ day: '2014-03-12', v: 15 },
-						{ day: '2014-03-13', v: 12 },
-						{ day: '2014-03-14', v: 5  },
-						{ day: '2014-03-15', v: 5  },
-						{ day: '2014-03-16', v: 20 }
-					];
-					Morris.Line({
-						element: 'hero-graph',
-						data: uploads_data,
-						xkey: 'day',
-						ykeys: ['v'],
-						labels: ['Value'],
-						lineColors: ['#fff'],
-						lineWidth: 2,
-						pointSize: 4,
-						gridLineColor: 'rgba(255,255,255,.5)',
-						resize: true,
-						gridTextColor: '#fff',
-						xLabels: "day",
-						xLabelFormat: function(d) {
-							return ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Setp','Out','Nov', 'Dez'][d.getMonth()] + ' ' + d.getDate(); 
-						},
-					});
-				});
-			</script>
-			<!-- / Javascript -->
-
+		<div class="col-xs-12 col-sm-12">
 			<div class="stat-panel">
 				<div class="stat-row">
 					<!-- Small horizontal padding, bordered, without right border, top aligned text -->
@@ -64,12 +26,12 @@
 						<ul class="list-group no-margin">
 							<!-- Without left and right borders, extra small horizontal padding, without background, no border radius -->
 							<li class="list-group-item no-border-hr no-border-b padding-xs-hr no-bg" ng-repeat="situacao in maquina.data.sumario">
-								{{ situacao.descricao }} <span class="label {{ situacao.situacao | statusPanelClass }} pull-right"> {{ situacao.percentual }}%</span>
+								{{ situacao.descricao }} <span class="label label-danger pull-right">{{ situacao.tempo | timeFormat }}</span> <span class="label {{ situacao.situacao | statusPanelClass }} pull-right"> {{ situacao.percentual }}%</span>
 							</li> <!-- / .list-group-item -->
 							<!-- Without left and right borders, extra small horizontal padding, without background -->
-							<!--<li class="list-group-item no-border-hr padding-xs-hr no-bg">
-								Audio <span class="label label-danger pull-right">128</span>
-							</li> --> <!-- / .list-group-item -->
+							<li class="list-group-item no-border-hr padding-xs-hr no-bg">
+								Total <span class="label label-danger pull-right">{{ maquina.total| timeFormat }}</span>
+							</li>  <!-- / .list-group-item -->
 							<!-- Without left and right borders, without bottom border, extra small horizontal padding, without background -->
 							<!--<li class="list-group-item no-border-hr no-border-b padding-xs-hr no-bg">
 								Videos <span class="label label-success pull-right">12</span>
@@ -84,126 +46,38 @@
 					</div>
 				</div>
 			</div> <!-- /.stat-panel -->
-<!-- /5. $UPLOADS_CHART -->
-
-<!-- 6. $EASY_PIE_CHARTS ===========================================================================
-
-			Easy Pie charts
--->
-			<!-- Javascript -->
-			<script>
-				init.push(function () {
-					// Easy Pie Charts
-					var easyPieChartDefaults = {
-						animate: 2000,
-						scaleColor: false,
-						lineWidth: 6,
-						lineCap: 'square',
-						size: 90,
-						trackColor: '#e5e5e5'
-					}
-					$('#easy-pie-chart-1').easyPieChart($.extend({}, easyPieChartDefaults, {
-						barColor: 'yellow';
-					}));
-					$('#easy-pie-chart-2').easyPieChart($.extend({}, easyPieChartDefaults, {
-						barColor: 'blue';
-					}));
-					$('#easy-pie-chart-3').easyPieChart($.extend({}, easyPieChartDefaults, {
-						barColor: 'red';
-					}));
-				});
-			</script>
-			<!-- / Javascript -->
-
-			<div class="row">
-				<div class="col-xs-4">
-					<!-- Centered text -->
-					<div class="stat-panel text-center">
-						<div class="stat-row">
-							<!-- Dark gray background, small padding, extra small text, semibold text -->
-							<div class="stat-cell bg-dark-gray padding-sm text-xs text-semibold">
-								<i class="fa fa-globe"></i>&nbsp;&nbsp;Temperatura
-							</div>
-						</div> <!-- /.stat-row -->
-						<div class="stat-row">
-							<!-- Bordered, without top border, without horizontal padding -->
-							<div class="stat-cell bordered no-border-t no-padding-hr">
-								<div class="pie-chart" data-percent="43" id="easy-pie-chart-1">
-									<div class="pie-chart-label">12.3TB</div>
-								</div>
-							</div>
-						</div> <!-- /.stat-row -->
-					</div> <!-- /.stat-panel -->
-				</div>
-				<div class="col-xs-4">
-					<div class="stat-panel text-center">
-						<div class="stat-row">
-							<!-- Dark gray background, small padding, extra small text, semibold text -->
-							<div class="stat-cell bg-dark-gray padding-sm text-xs text-semibold">
-								<i class="fa fa-flash"></i>&nbsp;&nbsp;Corrente
-							</div>
-						</div> <!-- /.stat-row -->
-						<div class="stat-row">
-							<!-- Bordered, without top border, without horizontal padding -->
-							<div class="stat-cell bordered no-border-t no-padding-hr">
-								<div class="pie-chart" data-percent="93" id="easy-pie-chart-2">
-									<div class="pie-chart-label">93%</div>
-								</div>
-							</div>
-						</div> <!-- /.stat-row -->
-					</div> <!-- /.stat-panel -->
-				</div>
-				<div class="col-xs-4">
-					<div class="stat-panel text-center">
-						<div class="stat-row">
-							<!-- Dark gray background, small padding, extra small text, semibold text -->
-							<div class="stat-cell bg-dark-gray padding-sm text-xs text-semibold">
-								<i class="fa fa-cloud"></i>&nbsp;&nbsp;Torque
-							</div>
-						</div> <!-- /.stat-row -->
-						<div class="stat-row">
-							<!-- Bordered, without top border, without horizontal padding -->
-							<div class="stat-cell bordered no-border-t no-padding-hr">
-								<div class="pie-chart" data-percent="75" id="easy-pie-chart-3">
-									<div class="pie-chart-label">12GB</div>
-								</div>
-							</div>
-						</div> <!-- /.stat-row -->
-					</div> <!-- /.stat-panel -->
-				</div>
-			</div>
 		</div>
-<!-- /6. $EASY_PIE_CHARTS -->
-
 	</div>
 
 	<div class="row">
 		<div class="col-sm-12 col-md-12">
-			<div class="panel-heading">
-				<span class="panel-title">Log de monitoramento</span>
-					<div class="panel-body">
-						<table class="table">
-					        <thead>
-					        <tr>
-					            <th>Recebido em</th>
-					            <th>Maquina</th>
-					            <th>Modo de Operacao</th>
-					            <th>Usuario</th>
-					            <th>Tempo Atividade (s)</th>
-					        </tr>
-					        </thead>
-					        <tbody>
-					        <tr class="panel {{ row.modo | statusPanelClass }}" ng-repeat="row in maquina.data.log">
-					            <td>{{ row.datahora | date : 'mediumTime' }}</td>
-					            <td>{{ row.maquina }}</td>
-					            <td>{{ row.modo | statusName }}</td>
-					            <td>{{ row.operador }}</td>
-					            <td>{{ row.tempo }}</td>
-					        </tr>
-					        </tbody>
-					    </table>
+			<div class="table-primary">
+				<div class="table-header">
+					<div class="table-caption">Log de monitoramento
 					</div>
 				</div>
+				<table class="table table-bordered">
+			        <thead>
+			        <tr>
+			        	<th>#</th>
+			            <th>Recebido em</th>
+			            <th>Data e Hora</th>
+			            <th>Modo de Operacao</th>
+			            <th>Usuario</th>
+			            <th>Tempo Atividade (s)</th>
+			        </tr>
+			        </thead>
+			        <tbody>
+			        <tr class="panel {{ row.modo | statusPanelClass }}" ng-repeat="row in maquina.data.log">
+			        	<td>{{ row.sequencia }}</td>
+			        	<td>{{ row.recebidoEm | date : 'medium' }}</td>
+			            <td>{{ row.datahora | date : 'medium' }}</td>
+			            <td>{{ row.modo | statusName }}</td>
+			            <td>{{ row.operador }}</td>
+			            <td>{{ row.tempo }}</td>
+			        </tr>
+			        </tbody>
+			    </table>
 			</div>
 		</div>
 	</div>

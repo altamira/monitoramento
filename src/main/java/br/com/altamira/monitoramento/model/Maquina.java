@@ -26,6 +26,9 @@ public class Maquina {
 	@Column(name = "SITUACAO")
 	private int situacao;
 	
+	@Column(name = "SEQUENCIA")
+	private long sequencia;
+	
 	@Column(name = "TEMPO")
 	private int tempo;
 	
@@ -73,6 +76,14 @@ public class Maquina {
 
 	public void setSituacao(int situacao) {
 		this.situacao = situacao;
+	}
+
+	public long getSequencia() {
+		return sequencia;
+	}
+
+	public void setSequencia(long sequencia) {
+		this.sequencia = sequencia;
 	}
 
 	public int getTempo() {

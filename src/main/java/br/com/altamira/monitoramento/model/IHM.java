@@ -25,6 +25,9 @@ public class IHM {
 	@Column(name = "OPERADOR")
 	private String operador;
 	
+	@Column(name = "VERSAO")
+	private String versao;
+	
 	public IHM() {
 		super();
 	}
@@ -40,6 +43,17 @@ public class IHM {
 		this.setor = setor;
 		this.ip = ip;
 		this.maquina = maquina;
+	}
+
+	public IHM(String codigo, String setor, String ip, String maquina,
+			String operador, String versao) {
+		super();
+		this.codigo = codigo;
+		this.setor = setor;
+		this.ip = ip;
+		this.maquina = maquina;
+		this.operador = operador;
+		this.versao = versao;
 	}
 
 	public String getCodigo() {
@@ -80,6 +94,14 @@ public class IHM {
 
 	public void setOperador(String operador) {
 		this.operador = operador;
+	}
+
+	public String getVersao() {
+		return versao;
+	}
+
+	public void setVersao(String versao) {
+		this.versao = versao;
 	}
 		
 }

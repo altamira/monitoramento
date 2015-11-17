@@ -20,6 +20,7 @@ import br.com.altamira.monitoramento.msg.ParametroMsg;
 import br.com.altamira.monitoramento.msg.StatusMsg;
 import br.com.altamira.monitoramento.repository.IHMLogRepository;
 import br.com.altamira.monitoramento.repository.IHMRepository;
+import br.com.altamira.monitoramento.repository.MaquinaLogErroRepository;
 import br.com.altamira.monitoramento.repository.MaquinaLogParametroRepository;
 import br.com.altamira.monitoramento.repository.MaquinaLogRepository;
 import br.com.altamira.monitoramento.repository.MaquinaRepository;
@@ -40,6 +41,9 @@ public class MonitoramentoController {
 	private MaquinaLogRepository maquinaLogRepository;
 	
 	@Autowired
+	private MaquinaLogErroRepository maquinaLogErroRepository;	
+	
+	@Autowired
 	private MaquinaLogParametroRepository maquinaLogParametroRepository;
 
 	@Autowired
@@ -55,7 +59,6 @@ public class MonitoramentoController {
 	@Qualifier("WebSocketHandler") 
 	private SendingTextWebSocketHandler sendingTextWebSocketHandler;
 
-	
 	@Transactional
 	@JmsListener(destination = "IHM-STATUS")
 	public void monitoramentoStatus(String msg) throws JsonParseException, JsonMappingException, IOException {
@@ -73,6 +76,7 @@ public class MonitoramentoController {
 		}
 		
 		ihm.setOperador(statusMsg.getOperador());
+		ihm.setVersao(statusMsg.getVersao());
 		
 		ihmRepository.saveAndFlush(ihm);
 		
@@ -83,6 +87,7 @@ public class MonitoramentoController {
 				statusMsg.getIHM().toUpperCase(),
 				statusMsg.getDatahora(),
 				statusMsg.getModo(),
+				statusMsg.getSequencia(),
 				statusMsg.getTempo(),
 				statusMsg.getOperador()
 				);
@@ -104,6 +109,7 @@ public class MonitoramentoController {
 			}
 			
 			maquina.setSituacao(statusMsg.getModo());
+			maquina.setSequencia(statusMsg.getSequencia());
 			maquina.setTempo(statusMsg.getTempo());
 			maquina.setOperador(statusMsg.getOperador());
 			maquina.setAtualizacao(new Date());
@@ -114,6 +120,7 @@ public class MonitoramentoController {
 					maquina.getCodigo().toUpperCase(),
 					statusMsg.getDatahora(),
 					statusMsg.getModo(),
+					statusMsg.getSequencia(),
 					statusMsg.getTempo(),
 					statusMsg.getOperador()
 					);
@@ -137,6 +144,7 @@ public class MonitoramentoController {
 			
 		}
 		
+		statusMsg.setRecebidoEm(new Date());
 		String approximateFirstReceiveTimestamp = String.valueOf(new Date().getTime());
 		
         try {
@@ -145,6 +153,13 @@ public class MonitoramentoController {
         	System.out.println(String.format("\n********************************************************************************\nWas not able to push the message to the client.\n********************************************************************************\n%s\n********************************************************************************\n", e.getMessage()));
         }
 		
+	}
+	
+	@Transactional
+	@JmsListener(destination = "MONITORAMENTO-LOG-ERRO")
+	public void monitoramentoLogsErro(String msg) throws JsonParseException, JsonMappingException, IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		StatusMsg statusMsg = mapper.readValue(msg, StatusMsg.class);
 	}
 	
 }

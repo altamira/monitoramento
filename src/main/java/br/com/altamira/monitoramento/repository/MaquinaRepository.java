@@ -18,4 +18,5 @@ public interface MaquinaRepository extends JpaRepository<Maquina, String> {
 	List<Maquina> findByDesatualizadas(@Param("segundos") int segundos);
 	
 	List<Maquina> findAllByAtivo(@Param("ativo") Boolean ativo);
+	
 }

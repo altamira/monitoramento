@@ -36,6 +36,9 @@ public class IHMLog {
 	@Column(name = "MODO")
 	private int modo;
 	
+	@Column(name = "SEQUENCIA")
+	private long sequencia;
+	
 	@Column(name = "TEMPO")
 	private int tempo;
 	
@@ -46,11 +49,13 @@ public class IHMLog {
 		super();
 	}
 
-	public IHMLog(String ihm, Date datahora, int modo, int tempo, String operador) {
+	public IHMLog(String ihm, Date datahora, int modo, long sequencia,
+			int tempo, String operador) {
 		super();
 		this.ihm = ihm;
 		this.datahora = datahora;
 		this.modo = modo;
+		this.sequencia = sequencia;
 		this.tempo = tempo;
 		this.operador = operador;
 	}
@@ -101,6 +106,14 @@ public class IHMLog {
 
 	public void setOperador(String operador) {
 		this.operador = operador;
+	}
+
+	public long getSequencia() {
+		return sequencia;
+	}
+
+	public void setSequencia(long sequencia) {
+		this.sequencia = sequencia;
 	}
 
 	public int getTempo() {

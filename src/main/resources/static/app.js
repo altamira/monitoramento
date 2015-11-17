@@ -138,10 +138,13 @@
             return $http.get('http://192.168.0.212:8080/maquinas/' + codigo);
         }
         this.getLog = function (codigo) {
-            return $http.get('http://192.168.0.212:8080/maquinaLogs/search/findAllByMaquina?maquina=' + codigo + '&page=1&size=20&sort=datahora,desc');
+            return $http.get('http://192.168.0.212:8080/maquinaLogs/search/findAllByMaquina?maquina=' + codigo + '&page=0&size=20&sort=datahora,desc');
         }
         this.getSumario = function(codigo) {
             return $http.get('http://192.168.0.212:8080/sumarios/search/findByMaquina?maquina=' + codigo);
+        }
+        this.getIHM = function(codigo) {
+            return $http.get('http://192.168.0.212:8080/iHMs/search/findAllByMaquina?maquina=' + codigo);
         }
     });
     
@@ -168,6 +171,7 @@
                 self.data = response.data;
                 self.data.log = [];
                 self.data.sumario = [];
+                self.data.ihm = [];
                 MaquinaService.getLog($routeParams.codigo).then(function (response) {
                     if (response.data.page.totalElements > 0) {
                         self.data.log = response.data._embedded.maquinaLogs;    
@@ -188,6 +192,9 @@
                              self.data.sumario[i].percentual = self.data.sumario[i].percentual.toFixed(2);
                         }
                     }
+                });
+                MaquinaService.getIHM($routeParams.codigo).then(function (response) {
+                    self.data.ihm = response.data._embedded.iHMs; 
                 });
             });
         }
@@ -243,9 +250,9 @@
                     var minutos = parseInt(segundos / 60, 10); 
                     var minuto = parseInt(minutos % 60, 10); 
                     var horas = parseInt(minutos / 60, 10);
-                    var hora = parseInt(horas % 60, 10);
+                    var hora = parseInt(horas % 24, 10);
                     var dias = parseInt(horas / 24, 10); 
-                    var dia = parseInt(dias % 24, 10);
+                    var dia = parseInt(dias, 10);
                     
                     if (dia > 1) {
                         self.options[i].tempo = dia + ' dias'
@@ -279,9 +286,9 @@
                         var minutos = parseInt(segundos / 60, 10); 
                         var minuto = parseInt(minutos % 60, 10); 
                         var horas = parseInt(minutos / 60, 10);
-                        var hora = parseInt(horas % 60, 10);
+                        var hora = parseInt(horas % 24, 10);
                         var dias = parseInt(horas / 24, 10); 
-                        var dia = parseInt(dias % 24, 10);
+                        var dia = parseInt(dias, 10);
                         
                         if (dia > 1) {
                             self.options[i].tempo = dia + ' dias'
@@ -395,7 +402,7 @@
     module.filter('statusName', function () {
         return function (input) {
             switch (input) {
-            case 0: return 'Parada Indeterminado';
+            case 0: return 'Parada Indeterminada';
             case 1: return 'Ociosa';
             case 2: return 'Produzindo';
             case 3: return 'Manual';
@@ -423,6 +430,42 @@
             }
         }
     }); 
+
+    module.filter('timeFormat', function () {
+        return function (input) {
+            var segundos = parseInt(input, 10); 
+            var segundo = parseInt(segundos % 60, 10); 
+            var minutos = parseInt(segundos / 60, 10); 
+            var minuto = parseInt(minutos % 60, 10); 
+            var horas = parseInt(minutos / 60, 10);
+            var hora = parseInt(horas % 24, 10);
+            var dias = parseInt(horas / 24, 10); 
+            var dia = parseInt(dias, 10);
+            
+            var format = '';
+
+            if (dia > 1) {
+                format = dia + ' dias '
+            } else if (dia == 1) {
+                format = dia + ' dia '
+            } 
+            
+            format += ("0" + hora).slice(-2) + ':' + ("0" + minuto).slice(-2) + ':' + ("0" + segundo).slice(-2) + ' h';
+            
+            /*if (hora > 0) {
+                format += hora + ' h '
+            } 
+            if (minuto > 0) {
+                format += minuto + ' min '
+            } 
+            if (segundo > 0) {
+                format += segundo + ' s';
+            }
+            format += ' [' + input + ']'*/
+
+            return format;
+        }
+    });
 
     module.filter('priority', function () {
         return function (input) {
@@ -572,9 +615,9 @@
                     var minutos = parseInt(segundos / 60, 10); 
                     var minuto = parseInt(minutos % 60, 10); 
                     var horas = parseInt(minutos / 60, 10);
-                    var hora = parseInt(horas % 60, 10);
+                    var hora = parseInt(horas % 24, 10);
                     var dias = parseInt(horas / 24, 10); 
-                    var dia = parseInt(dias % 24, 10);
+                    var dia = parseInt(dias, 10);
                     
                     if (dia > 1) {
                         self.maquinas[i].tempo = dia + ' dias'
@@ -595,7 +638,7 @@
         
         function initView() {
 
-            var sock = new SockJS('http://192.168.0.212:8080http://127.0.0.1:8080/api/notify');
+            var sock = new SockJS('http://192.168.0.212:8080/api/notify');
             sock.onmessage = function (response) {
                 var msg = JSON.parse(response.data);
 
@@ -610,9 +653,9 @@
                         var minutos = parseInt(segundos / 60, 10); 
                         var minuto = parseInt(minutos % 60, 10); 
                         var horas = parseInt(minutos / 60, 10);
-                        var hora = parseInt(horas % 60, 10);
+                        var hora = parseInt(horas % 24, 10);
                         var dias = parseInt(horas / 24, 10); 
-                        var dia = parseInt(dias % 24, 10);
+                        var dia = parseInt(dias, 10);
                         
                         if (dia > 1) {
                             self.maquinas[i].tempo = dia + ' dias'

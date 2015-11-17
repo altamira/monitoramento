@@ -47,8 +47,6 @@ public class MonitorScheduler {
 				
 				StatusMsg statusMsg = new StatusMsg("", maquina.getCodigo(), new Date(), maquina.getOperador(), maquina.getSituacao(), maquina.getTempo());
 				
-				statusMsg.setTempoFormatado(statusMsg.getTempo());
-				
 				String approximateFirstReceiveTimestamp = String.valueOf(new Date().getTime());
 				
 		        try {
