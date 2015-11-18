@@ -15,6 +15,7 @@ import br.com.altamira.monitoramento.model.IHM;
 import br.com.altamira.monitoramento.model.IHMLog;
 import br.com.altamira.monitoramento.model.Maquina;
 import br.com.altamira.monitoramento.model.MaquinaLog;
+import br.com.altamira.monitoramento.model.MaquinaLogErro;
 import br.com.altamira.monitoramento.model.MaquinaLogParametro;
 import br.com.altamira.monitoramento.msg.ParametroMsg;
 import br.com.altamira.monitoramento.msg.StatusMsg;
@@ -65,6 +66,15 @@ public class MonitoramentoController {
 		ObjectMapper mapper = new ObjectMapper();
 		StatusMsg statusMsg = mapper.readValue(msg, StatusMsg.class);
 		
+		if (statusMsg.getTempo() > 35) {
+			System.out.println(String.format(
+					"\n--------------------------------------------------------------------------------\nINTERVALO DE TEMPO INVALIDO: %s\n--------------------------------------------------------------------------------\n", statusMsg.getIHM().toUpperCase()));
+
+			MaquinaLogErro maquinaLogErro = new MaquinaLogErro(new Date(), statusMsg.getIHM().toUpperCase(), String.format("Intervalo de tempo invalido, intevalo recebido %d", statusMsg.getTempo()), msg);
+			maquinaLogErroRepository.saveAndFlush(maquinaLogErro);
+
+		}
+		
 		IHM ihm = ihmRepository.findOne(statusMsg.getIHM());
 		
 		if (ihm == null) {
@@ -72,6 +82,9 @@ public class MonitoramentoController {
 					"\n--------------------------------------------------------------------------------\nIHM NAO CADASTRADA: %s\n--------------------------------------------------------------------------------\n", statusMsg.getIHM()));
 			
 			ihm = new IHM(statusMsg.getIHM());
+			
+			MaquinaLogErro maquinaLogErro = new MaquinaLogErro(new Date(), statusMsg.getIHM().toUpperCase(), "IHM nao cadastrada", msg);
+			maquinaLogErroRepository.saveAndFlush(maquinaLogErro);
 		
 		}
 		
@@ -94,8 +107,6 @@ public class MonitoramentoController {
 		
 		ihmLogRepository.saveAndFlush(ihmLog);
 		
-		System.out.println(String.format("IHM LOG ID: %d", ihmLog.getId()));
-		
 		if (ihm.getMaquina() != null && !ihm.getMaquina().isEmpty()) {
 			
 			Maquina maquina = maquinaRepository.findOne(ihm.getMaquina().toUpperCase());
@@ -108,12 +119,25 @@ public class MonitoramentoController {
 				statusMsg.setMaquina(maquina.getCodigo());
 			}
 			
+			if (statusMsg.getSequencia() > 0 && maquina.getSequencia() + 1 != statusMsg.getSequencia()) {
+				System.out.println(String.format(
+						"\n--------------------------------------------------------------------------------\nERRO DE SEQUENCIA: %s\n--------------------------------------------------------------------------------\n", ihm.getMaquina().toUpperCase()));
+				
+				MaquinaLogErro maquinaLogErro = new MaquinaLogErro(new Date(), maquina.getCodigo().toUpperCase(), String.format("Erro de sequencia, esperado %d, recebido %d", maquina.getSequencia() + 1, statusMsg.getSequencia()), msg);
+				maquinaLogErroRepository.saveAndFlush(maquinaLogErro);
+			}
+			
+			if (maquina.getSituacao() == statusMsg.getModo()) {
+				maquina.setTempo(maquina.getTempo() + statusMsg.getTempo());
+			} else {
+				maquina.setTempo(statusMsg.getTempo());
+			}
+		
 			maquina.setSituacao(statusMsg.getModo());
 			maquina.setSequencia(statusMsg.getSequencia());
-			maquina.setTempo(statusMsg.getTempo());
 			maquina.setOperador(statusMsg.getOperador());
 			maquina.setAtualizacao(new Date());
-		
+			
 			maquinaRepository.saveAndFlush(maquina);
 			
 			MaquinaLog maquinaLog = new MaquinaLog(
@@ -126,8 +150,6 @@ public class MonitoramentoController {
 					);
 			
 			maquinaLogRepository.saveAndFlush(maquinaLog);
-			
-			System.out.println(String.format("LOG ID: %d", maquinaLog.getId()));
 			
 			if (statusMsg.getParametros() != null) {
 				maquinaLog.setParametros(new HashSet<MaquinaLogParametro>());
@@ -142,24 +164,21 @@ public class MonitoramentoController {
 				}
 			}
 			
+			statusMsg.setTempo(maquina.getTempo());
+			statusMsg.setRecebidoEm(new Date());
+			
 		}
 		
-		statusMsg.setRecebidoEm(new Date());
 		String approximateFirstReceiveTimestamp = String.valueOf(new Date().getTime());
 		
         try {
             this.sendingTextWebSocketHandler.broadcastToSessions(new DataWithTimestamp<StatusMsg>(statusMsg, approximateFirstReceiveTimestamp));
         } catch (IOException e) {
-        	System.out.println(String.format("\n********************************************************************************\nWas not able to push the message to the client.\n********************************************************************************\n%s\n********************************************************************************\n", e.getMessage()));
+        	MaquinaLogErro maquinaLogErro = new MaquinaLogErro(new Date(), statusMsg.getIHM().toUpperCase(), "Erro de broadcast", msg);
+			maquinaLogErroRepository.saveAndFlush(maquinaLogErro);
+        	System.out.println(String.format("\n********************************************************************************\nErro de broadcast para o clientes conectados via JSocket.\n********************************************************************************\n%s\n********************************************************************************\n", e.getMessage()));
         }
 		
-	}
-	
-	@Transactional
-	@JmsListener(destination = "MONITORAMENTO-LOG-ERRO")
-	public void monitoramentoLogsErro(String msg) throws JsonParseException, JsonMappingException, IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		StatusMsg statusMsg = mapper.readValue(msg, StatusMsg.class);
 	}
 	
 }

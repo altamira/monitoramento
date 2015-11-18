@@ -2,7 +2,7 @@
 (function () {
     var module = angular.module('monitor', ['ngRoute']);
                      
-    module.directive('areachart', function ($window) {
+    module.directive('barchart', function ($window) {
 
         return {
             restrict: 'E',
@@ -19,7 +19,7 @@
 
                 attrs.$observe('value', function (val) {
                     if (!morris) {
-                        console.log('creating chart');
+                        //console.log('creating chart');
                         morris = Morris.Bar({
                             element: element,
                             data: angular.fromJson(val),
@@ -33,16 +33,16 @@
                             resize: true,
                             gridTextColor: '#fff',
                             barColors: function (row, series, type) {
-                                //console.log("--> "+row.label, series, type);
-                                if(row.x == "0") return "#AD1D28";
-                                else if(row.x == "1") return "#DEBB27";
-                                else if(row.x == "2") return "#fec04c";
-                                else if(row.x == "3") return "#1AB244";
-                                else if(row.x == "4") return "#1AB444";
-                                else if(row.x == "5") return "#1ABf44";
-                                else if(row.x == "6") return "#3AB244";
-                                else if(row.x == "7") return "#1cB244";
-                                else if(row.x == "99") return "#4AB144";
+                                //console.log("--> "+row.label, row.x, series, type);
+                                if(row.label == 'Parada Indeterminada') return "#e66454";
+                                else if(row.label == 'Ociosa') return "#5ebd5e";
+                                else if(row.label == 'Produzindo') return "#5bc0de";
+                                else if(row.label == 'Produzindo (Ajuste Manual)') return "#5bc0de";
+                                else if(row.label == 'Preparacao') return "#5bc0de";
+                                else if(row.label == 'Manutencao') return "#e66454";
+                                else if(row.label == 'Maquina Desligada') return "#5ebd5e";
+                                else if(row.label == 'IHM Desligada') return "#f4b04f";
+                                else if(row.label == 'Falha Comunicacao') return "#e66454";
                             }
                         });
                     } else {
@@ -54,97 +54,22 @@
         };
     });
 
-    module.directive('barchart', function() {
-
-        return {
-
-            // required to make it work as an element
-            restrict: 'E',
-            template: '<div></div>',
-            replace: true,
-            // observe and manipulate the DOM
-            link: function($scope, element, attrs) {
-
-                var data = $scope[attrs.data],
-                    xkey = $scope[attrs.xkey],
-                    ykeys= $scope[attrs.ykeys],
-                    labels= $scope[attrs.labels];
-
-                Morris.Bar({
-                        element: element,
-                        data: data,
-                        xkey: xkey,
-                        ykeys: ykeys,
-                        labels: labels
-                    });
-
-            }
-
-        };
-
-    });
-
-    // Global stuff
-    module.directive('active', function ($location) {
-        return {
-            link: function (scope, element) {
-                function makeActiveIfMatchesCurrentPath() {
-                    if ($location.path().indexOf(element.find('a').attr('href').substr(1)) > -1) {
-                        element.addClass('active');
-                    } else {
-                        element.removeClass('active');
-                    }
-                }
-
-                scope.$on('$routeChangeSuccess', function () {
-                    makeActiveIfMatchesCurrentPath();
-                });
-            }
-        };
-    });
-
-    module.service('SourceCodeService', function ($http) {
-        this.getSourceCode = function (path) {
-            return $http.get('http://192.168.0.212:8080source?path=' + path);
-        };
-    });
-
-    module.directive('sourceCode', function (SourceCodeService, $timeout) {
-        return {
-            restrict: 'E',
-            templateUrl: 'templates/source-box.tpl.html',
-            scope: {
-                path: '@'
-            },
-            link: function (scope, element) {
-                SourceCodeService.getSourceCode(scope.path).then(function (response) {
-                    scope.code = response.data.content;
-                    scope.link = response.data.url;
-                    scope.title = response.data.name;
-                    $timeout(function () {
-                        hljs.highlightBlock(element.find('code')[0]);
-                    });
-                });
-            }
-        }
-    });
-
     // maquina services
     module.service('MaquinaService', function ($http) {
     	this.getAll = function () {
-            return $http.get('http://192.168.0.212:8080/maquinas/search/findAllByAtivo?ativo=true');
+            return $http.get('http://fabrica.grupo.altamira.com.br/maquinas/search/findAllByAtivo?ativo=true');
         }
     	this.get = function (codigo) {
-            return $http.get('http://192.168.0.212:8080/maquinas/' + codigo);
+            return $http.get('http://fabrica.grupo.altamira.com.br/maquinas/' + codigo);
         }
         this.getLog = function (codigo) {
-            return $http.get('http://192.168.0.212:8080/maquinaLogs/search/findAllByMaquina?maquina=' + codigo + '&page=0&size=20&sort=datahora,desc');
+            return $http.get('http://fabrica.grupo.altamira.com.br/maquinaLogs/search/findAllByMaquina?maquina=' + codigo + '&page=0&size=20&sort=datahora,desc');
         }
         this.getSumario = function(codigo) {
-            return $http.get('http://192.168.0.212:8080/sumarios/search/findByMaquina?maquina=' + codigo);
+            return $http.get('http://fabrica.grupo.altamira.com.br/sumarios/search/findByMaquina?maquina=' + codigo);
         }
         this.getIHM = function(codigo) {
-            return $http.get('http://192.168.0.212:8080/iHMs/search/findAllByMaquina?maquina=' + codigo);
+            return $http.get('http://fabrica.grupo.altamira.com.br/iHMs/search/findAllByMaquina?maquina=' + codigo);
         }
     });
     
@@ -163,7 +88,7 @@
         /*{ descricao: 'Ociosa', tempo: 20 },
         { descricao: 'Preparacao', tempo: 35 },
         { descricao: 'Producao', tempo: 20 },
-        { descricao: 'Manual', tempo: 20 }*/
+        { descricao: 'Produzindo (Ajuste Manual)', tempo: 20 }*/
         ];
 
         function refresh() {
@@ -203,7 +128,7 @@
 
         function initView() {
 
-            var sock = new SockJS('http://192.168.0.212:8080/api/notify');
+            var sock = new SockJS('http://fabrica.grupo.altamira.com.br/api/notify');
             sock.onmessage = function (response) {
                 var msg = JSON.parse(response.data);
 
@@ -273,7 +198,7 @@
         
         function initView() {
 
-            var sock = new SockJS('http://192.168.0.212:8080/api/notify');
+            var sock = new SockJS('http://fabrica.grupo.altamira.com.br/api/notify');
             sock.onmessage = function (response) {
                 var msg = JSON.parse(response.data);
 
@@ -323,50 +248,6 @@
     
     // end menu services
     
-    // SQS
-    module.service('SqsService', function ($http) {
-        this.sendMessage = function (message) {
-            return $http.post('sqs/message-processing-queue', message);
-        };
-    });
-
-    module.controller('SqsCtrl', function (SqsService, $scope) {
-        var self = this;
-        self.model = {};
-        self.responses = [];
-
-        function initMessageToProcess() {
-            self.model.messageToProcess = {
-                message: undefined,
-                priority: 2
-            };
-        }
-
-        self.sendMessage = function () {
-            SqsService.sendMessage(self.model.messageToProcess);
-            initMessageToProcess();
-        };
-
-        function initView() {
-            initMessageToProcess();
-
-            var sock = new SockJS('http://192.168.0.212:8080/notify');
-            sock.onmessage = function (e) {
-                var jsonResponse = JSON.parse(e.data);
-                self.responses.reverse().push(jsonResponse);
-
-                if (self.responses.length > 10) {
-                    self.responses = self.responses.slice(self.responses.length - 10);
-                }
-
-                self.responses = self.responses.reverse();
-                $scope.$apply();
-            };
-        }
-
-        initView();
-    });
-
     module.filter('statusClass', function () {
         return function (input) {
             switch (input) {
@@ -405,7 +286,7 @@
             case 0: return 'Parada Indeterminada';
             case 1: return 'Ociosa';
             case 2: return 'Produzindo';
-            case 3: return 'Manual';
+            case 3: return 'Produzindo (Ajuste Manual)';
             case 4: return 'Preparacao';
             case 5: return 'Manutencao';
             case 6: return 'Maquina Desligada';
@@ -467,138 +348,6 @@
         }
     });
 
-    module.filter('priority', function () {
-        return function (input) {
-            switch (input) {
-                case 1:
-                    return 'Low';
-                case 2:
-                    return 'Medium';
-                case 3:
-                    return 'High';
-            }
-        }
-    });
-
-    // SNS
-    module.service('SnsService', function ($http) {
-        this.send = function (message) {
-            return $http.post('sns/send', message);
-        };
-    });
-
-    module.controller('SnsCtrl', function (SnsService, $scope) {
-        var self = this;
-        self.responses = [];
-
-        function initModel() {
-            self.model = {
-                message: undefined,
-                subject: undefined
-            };
-        }
-
-        self.send = function () {
-            SnsService.send(self.model);
-            initModel();
-        };
-
-        function initView() {
-            initModel();
-
-            var sock = new SockJS('http://192.168.0.212:8080/sns-messages');
-            sock.onmessage = function (e) {
-                var jsonResponse = JSON.parse(e.data);
-                self.responses.reverse().push(jsonResponse);
-
-                if (self.responses.length > 10) {
-                    self.responses = self.responses.slice(self.responses.length - 10);
-                }
-
-                self.responses = self.responses.reverse();
-                $scope.$apply();
-            };
-        }
-
-        initView();
-    });
-
-    // RDS
-    module.service('PersonService', function ($http) {
-        this.add = function (person) {
-            return $http.post('persons', person);
-        };
-
-        this.getAll = function () {
-            return $http.get('http://192.168.0.212:8080persons');
-        }
-    });
-
-    module.controller('RdsCtrl', function (PersonService) {
-        var self = this;
-        self.persons = [];
-
-        function refresh() {
-            PersonService.getAll().then(function (response) {
-                self.persons = response.data;
-            });
-        }
-
-        refresh();
-
-        function initView() {
-            self.model = {
-                firstName: undefined,
-                lastName: undefined
-            };
-        }
-
-        initView();
-
-        self.add = function () {
-            PersonService.add(self.model).then(function () {
-                refresh();
-            });
-            initView();
-        };
-    });
-
-    // ElastiCache
-    module.service('ElastiCacheService', function ($http) {
-        this.getValue = function (key) {
-            return $http.get('http://192.168.0.212:8080cachedService?key=' + key, {headers: {Accept: 'text/plain'}});
-        };
-    });
-
-    module.controller('ElastiCacheCtrl', function ($scope, ElastiCacheService) {
-        var self = this;
-        self.loading = false;
-
-        self.getValue = function () {
-            self.value = '';
-            self.loading = true;
-            ElastiCacheService.getValue(self.key).then(function (response) {
-                self.loading = false;
-                self.value = response.data;
-            });
-        };
-    });
-
-    // EC2
-    module.service('Ec2Service', function ($http) {
-        this.getProperties = function () {
-            return $http.get('http://192.168.0.212:8080info');
-        };
-    });
-
-    module.controller('Ec2Ctrl', function (Ec2Service) {
-        var self = this;
-
-        Ec2Service.getProperties().then(function (response) {
-            self.properties = response.data;
-        });
-    });
-
     module.controller('DashboardCtrl', ['MaquinaService', '$scope','$routeParams', function (MaquinaService, $scope, $routeParams) {
         var self = this;
         self.maquinas = [];
@@ -638,7 +387,7 @@
         
         function initView() {
 
-            var sock = new SockJS('http://192.168.0.212:8080/api/notify');
+            var sock = new SockJS('http://fabrica.grupo.altamira.com.br/api/notify');
             sock.onmessage = function (response) {
                 var msg = JSON.parse(response.data);
 
@@ -681,15 +430,9 @@
     module.config(function ($routeProvider) {
         $routeProvider.when('/home', {templateUrl: '/pages/home.tpl.html'});
         $routeProvider.when('/index', {templateUrl: '/template/index.html'});
-        $routeProvider.when('/sqs', {templateUrl: '/pages/sqs.tpl.html'});
-        $routeProvider.when('/sns', {templateUrl: '/pages/sns.tpl.html'});
-        $routeProvider.when('/elasticache', {templateUrl: '/pages/elasticache.tpl.html'});
-        $routeProvider.when('/rds', {templateUrl: '/pages/rds.tpl.html'});
-        $routeProvider.when('/ec2', {templateUrl: '/pages/ec2.tpl.html'});
         $routeProvider.when('/main', {templateUrl: '/pages/main.tpl.html'});
         $routeProvider.when('/dashboard', {templateUrl: '/pages/dashboard.html'});
         $routeProvider.when('/maquina/:codigo', {templateUrl: '/pages/maquina.html'});
         $routeProvider.otherwise({redirectTo: '/dashboard'});
-        //$routeProvider.otherwise({redirectTo: '/main'});
     });
 }());
