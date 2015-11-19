@@ -57,19 +57,19 @@
     // maquina services
     module.service('MaquinaService', function ($http) {
     	this.getAll = function () {
-            return $http.get('http://fabrica.grupo.altamira.com.br/maquinas/search/findAllByAtivo?ativo=true');
+            return $http.get('/maquinas/search/findAllByAtivo?ativo=true');
         }
     	this.get = function (codigo) {
-            return $http.get('http://fabrica.grupo.altamira.com.br/maquinas/' + codigo);
+            return $http.get('/maquinas/' + codigo);
         }
         this.getLog = function (codigo) {
-            return $http.get('http://fabrica.grupo.altamira.com.br/maquinaLogs/search/findAllByMaquina?maquina=' + codigo + '&page=0&size=20&sort=datahora,sequencia,desc');
+            return $http.get('/maquinaLogs/search/findAllByMaquina?maquina=' + codigo + '&page=0&size=20&sort=datahora,sequencia,desc');
         }
         this.getSumario = function(codigo) {
-            return $http.get('http://fabrica.grupo.altamira.com.br/sumarios/search/findByMaquina?maquina=' + codigo);
+            return $http.get('/sumarios/search/findByMaquina?maquina=' + codigo);
         }
         this.getIHM = function(codigo) {
-            return $http.get('http://fabrica.grupo.altamira.com.br/iHMs/search/findAllByMaquina?maquina=' + codigo);
+            return $http.get('/iHMs/search/findAllByMaquina?maquina=' + codigo);
         }
     });
     
@@ -128,7 +128,7 @@
 
         function initView() {
 
-            var sock = new SockJS('http://fabrica.grupo.altamira.com.br/api/notify');
+            var sock = new SockJS('/api/notify');
             sock.onmessage = function (response) {
                 var msg = JSON.parse(response.data);
 
@@ -198,7 +198,7 @@
         
         function initView() {
 
-            var sock = new SockJS('http://fabrica.grupo.altamira.com.br/api/notify');
+            var sock = new SockJS('/api/notify');
             sock.onmessage = function (response) {
                 var msg = JSON.parse(response.data);
 
@@ -387,7 +387,7 @@
         
         function initView() {
 
-            var sock = new SockJS('http://fabrica.grupo.altamira.com.br/api/notify');
+            var sock = new SockJS('/api/notify');
             sock.onmessage = function (response) {
                 var msg = JSON.parse(response.data);
 

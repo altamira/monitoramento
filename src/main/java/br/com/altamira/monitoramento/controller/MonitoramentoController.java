@@ -66,13 +66,14 @@ public class MonitoramentoController {
 		ObjectMapper mapper = new ObjectMapper();
 		StatusMsg statusMsg = mapper.readValue(msg, StatusMsg.class);
 		
-		if (statusMsg.getTempo() > 45) {
+		if (statusMsg.getTempo() > 100 || statusMsg.getTempo() < 0) {
 			System.out.println(String.format(
-					"\n--------------------------------------------------------------------------------\nINTERVALO DE TEMPO INVALIDO: %s\n--------------------------------------------------------------------------------\n", statusMsg.getIHM().toUpperCase()));
+					"\n--------------------------------------------------------------------------------\nINTERVALO DE TEMPO INVALIDO: %s %d\n--------------------------------------------------------------------------------\n", statusMsg.getIHM().toUpperCase(), statusMsg.getTempo()));
 
-			MaquinaLogErro maquinaLogErro = new MaquinaLogErro(new Date(), statusMsg.getIHM().toUpperCase(), String.format("Intervalo de tempo invalido, intevalo recebido %d", statusMsg.getTempo()), msg);
+			MaquinaLogErro maquinaLogErro = new MaquinaLogErro(new Date(), statusMsg.getIHM().toUpperCase(), String.format("Intervalo de tempo invalido %d", statusMsg.getTempo()), msg);
 			maquinaLogErroRepository.saveAndFlush(maquinaLogErro);
 
+			if (statusMsg.getTempo() < 0) return;
 		}
 		
 		IHM ihm = ihmRepository.findOne(statusMsg.getIHM());
