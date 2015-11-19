@@ -66,7 +66,7 @@ public class MonitoramentoController {
 		ObjectMapper mapper = new ObjectMapper();
 		StatusMsg statusMsg = mapper.readValue(msg, StatusMsg.class);
 		
-		if (statusMsg.getTempo() > 35) {
+		if (statusMsg.getTempo() > 45) {
 			System.out.println(String.format(
 					"\n--------------------------------------------------------------------------------\nINTERVALO DE TEMPO INVALIDO: %s\n--------------------------------------------------------------------------------\n", statusMsg.getIHM().toUpperCase()));
 
@@ -114,6 +114,10 @@ public class MonitoramentoController {
 			if (maquina == null) {
 				System.out.println(String.format(
 						"\n--------------------------------------------------------------------------------\nMAQUINA NAO ENCONTRADA: %s\n--------------------------------------------------------------------------------\n", ihm.getMaquina().toUpperCase()));
+				
+				MaquinaLogErro maquinaLogErro = new MaquinaLogErro(new Date(), maquina.getCodigo().toUpperCase(), String.format("Maquina nao encontrada %s", ihm.getMaquina().toUpperCase()), msg);
+				maquinaLogErroRepository.saveAndFlush(maquinaLogErro);
+				
 				return;
 			} else {
 				statusMsg.setMaquina(maquina.getCodigo());
@@ -174,9 +178,10 @@ public class MonitoramentoController {
         try {
             this.sendingTextWebSocketHandler.broadcastToSessions(new DataWithTimestamp<StatusMsg>(statusMsg, approximateFirstReceiveTimestamp));
         } catch (IOException e) {
+        	System.out.println(String.format("\n********************************************************************************\nErro de broadcast para o clientes conectados via JSocket.\n********************************************************************************\n%s\n********************************************************************************\n", e.getMessage()));
+
         	MaquinaLogErro maquinaLogErro = new MaquinaLogErro(new Date(), statusMsg.getIHM().toUpperCase(), "Erro de broadcast", msg);
 			maquinaLogErroRepository.saveAndFlush(maquinaLogErro);
-        	System.out.println(String.format("\n********************************************************************************\nErro de broadcast para o clientes conectados via JSocket.\n********************************************************************************\n%s\n********************************************************************************\n", e.getMessage()));
         }
 		
 	}

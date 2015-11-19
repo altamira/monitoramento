@@ -43,7 +43,7 @@ public class MaquinaLog {
 	private long sequencia;
 	
 	@Column(name = "TEMPO")
-	private int tempo;
+	private long tempo;
 	
 	@Column(name = "OPERADOR")
 	private String operador;
@@ -56,7 +56,7 @@ public class MaquinaLog {
 	}
 
 	public MaquinaLog(String maquina, Date datahora, int modo, long sequencia,
-			int tempo, String operador) {
+			long tempo, String operador) {
 		super();
 		this.maquina = maquina;
 		this.datahora = datahora;
@@ -122,11 +122,11 @@ public class MaquinaLog {
 		this.sequencia = sequencia;
 	}
 
-	public int getTempo() {
+	public long getTempo() {
 		return tempo;
 	}
 
-	public void setTempo(int tempo) {
+	public void setTempo(long tempo) {
 		this.tempo = tempo;
 	}
 

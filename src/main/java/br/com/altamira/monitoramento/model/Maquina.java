@@ -30,7 +30,7 @@ public class Maquina {
 	private long sequencia;
 	
 	@Column(name = "TEMPO")
-	private int tempo;
+	private long tempo;
 	
 	@Column(name = "OPERADOR")
 	private String operador;
@@ -86,11 +86,11 @@ public class Maquina {
 		this.sequencia = sequencia;
 	}
 
-	public int getTempo() {
+	public long getTempo() {
 		return tempo;
 	}
 
-	public void setTempo(int tempo) {
+	public void setTempo(long tempo) {
 		this.tempo = tempo;
 	}
 

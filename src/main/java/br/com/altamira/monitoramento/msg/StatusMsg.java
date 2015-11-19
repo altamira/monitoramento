@@ -20,7 +20,7 @@ public class StatusMsg {
 	
 	private long sequencia;
 	
-	private int tempo;
+	private long tempo;
 	
 	private String versao;
 	
@@ -34,7 +34,7 @@ public class StatusMsg {
 	}
 
 	public StatusMsg(String ihm, String maquina, Date datahora,
-			String operador, int modo, int tempo) {
+			String operador, int modo, long tempo) {
 		super();
 		this.ihm = ihm;
 		this.maquina = maquina;
@@ -46,7 +46,7 @@ public class StatusMsg {
 	}
 
 	public StatusMsg(String ihm, String maquina, Date datahora,
-			String operador, int modo, long sequencia, int tempo) {
+			String operador, int modo, long sequencia, long tempo) {
 		super();
 		this.ihm = ihm;
 		this.maquina = maquina;
@@ -59,7 +59,7 @@ public class StatusMsg {
 	}
 
 	public StatusMsg(String ihm, String maquina, Date datahora,
-			String operador, int modo, long sequencia, int tempo, String versao) {
+			String operador, int modo, long sequencia, long tempo, String versao) {
 		super();
 		this.ihm = ihm;
 		this.maquina = maquina;
@@ -73,7 +73,7 @@ public class StatusMsg {
 	}
 
 	public StatusMsg(String ihm, String maquina, Date recebidoEm, Date datahora,
-			String operador, int modo, long sequencia, int tempo, String versao) {
+			String operador, int modo, long sequencia, long tempo, String versao) {
 		super();
 		this.ihm = ihm;
 		this.maquina = maquina;
@@ -143,11 +143,11 @@ public class StatusMsg {
 		this.sequencia = sequencia;
 	}
 
-	public int getTempo() {
+	public long getTempo() {
 		return tempo;
 	}
 
-	public void setTempo(int tempo) {
+	public void setTempo(long tempo) {
 		this.tempo = tempo;
 		this.setTempoFormatado(tempo);
 	}
@@ -164,14 +164,14 @@ public class StatusMsg {
 		return tempoFormatado;
 	}
 
-	public void setTempoFormatado(int segundos) {
-		int segundo = segundos % 60; 
-		int minutos = segundos / 60; 
-		int minuto = minutos % 60; 
-		int horas = minutos / 60;
-		int hora = horas % 24;
-		int dias = horas / 24; 
-		int dia = dias;
+	public void setTempoFormatado(long segundos) {
+		long segundo = segundos % 60; 
+		long minutos = segundos / 60; 
+		long minuto = minutos % 60; 
+		long horas = minutos / 60;
+		long hora = horas % 24;
+		long dias = horas / 24; 
+		long dia = dias;
 		
 		if (dia > 1) {
 			this.tempoFormatado = String.format("%d dias", dia);

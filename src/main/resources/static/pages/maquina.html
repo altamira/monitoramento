@@ -62,8 +62,8 @@
 					        <thead>
 					        <tr>
 					        	<th>#</th>
-					            <th>Recebido em</th>
 					            <th>Data e Hora</th>
+					            <th>Recebido em</th>
 					            <th>Modo de Operacao</th>
 					            <th>Usuario</th>
 					            <th>Tempo Atividade (s)</th>
@@ -72,8 +72,8 @@
 					        <tbody>
 					        <tr class="panel {{ row.modo | statusPanelClass }}" ng-repeat="row in maquina.data.log">
 					        	<td>{{ row.sequencia }}</td>
-					        	<td>{{ row.recebidoEm | date : 'medium' }}</td>
 					            <td>{{ row.datahora | date : 'medium' }}</td>
+					        	<td>{{ row.recebidoEm | date : 'medium' }}</td>
 					            <td>{{ row.modo | statusName }}</td>
 					            <td>{{ row.operador }}</td>
 					            <td>{{ row.tempo }}</td>

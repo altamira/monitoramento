@@ -14,7 +14,7 @@ import br.com.altamira.monitoramento.model.Maquina;
 @Transactional
 public interface MaquinaRepository extends JpaRepository<Maquina, String> {
 	
-	@Query("SELECT m FROM Maquina m WHERE ATIVO = 1 AND DATEDIFF(SECOND, m.atualizacao, GETDATE()) > :segundos")
+	@Query("SELECT m FROM Maquina m WHERE m.ativo = 1 AND m.situacao <> 7 AND DATEDIFF(SECOND, m.atualizacao, GETDATE()) > :segundos")
 	List<Maquina> findByDesatualizadas(@Param("segundos") int segundos);
 	
 	List<Maquina> findAllByAtivo(@Param("ativo") Boolean ativo);

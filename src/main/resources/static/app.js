@@ -63,7 +63,7 @@
             return $http.get('http://fabrica.grupo.altamira.com.br/maquinas/' + codigo);
         }
         this.getLog = function (codigo) {
-            return $http.get('http://fabrica.grupo.altamira.com.br/maquinaLogs/search/findAllByMaquina?maquina=' + codigo + '&page=0&size=20&sort=datahora,desc');
+            return $http.get('http://fabrica.grupo.altamira.com.br/maquinaLogs/search/findAllByMaquina?maquina=' + codigo + '&page=0&size=20&sort=datahora,sequencia,desc');
         }
         this.getSumario = function(codigo) {
             return $http.get('http://fabrica.grupo.altamira.com.br/sumarios/search/findByMaquina?maquina=' + codigo);
