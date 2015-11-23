@@ -1,4 +1,4 @@
-/* global angular,hljs */
+/* global angular.js */
 (function () {
     var module = angular.module('monitor', ['ngRoute']);
                      
@@ -133,8 +133,9 @@
                 var msg = JSON.parse(response.data);
 
                 if (self.data.codigo == msg.data.maquina) {
-                    self.data.tempo = msg.data.tempo;
+                	
                     self.data.situacao = msg.data.modo;
+            		self.data.tempo = msg.data.tempo;
                     self.data.operador = msg.data.operador;
 
                     self.data.log.reverse().push(msg.data);
@@ -164,6 +165,12 @@
         	MaquinaService.getAll().then(function (response) {
                 self.options = response.data._embedded.maquinas;
                 for( var i = 0; i < self.options.length; ++i ) {
+                	
+                	if (self.options[i].falhaComunicacao > 0) {
+                		self.options[i].tempo = self.options[i].falhaComunicacao;
+                		self.options[i].situacao = 99;
+                	}
+                	
                 	if (self.options[i].situacao == '0' ||
                 		self.options[i].situacao == '5' ||
                 		self.options[i].situacao == '99') {
@@ -359,6 +366,11 @@
 
                 for( var i = 0; i < self.maquinas.length; ++i ) {
 
+                	if (self.maquinas[i].falhaComunicacao > 0) {
+                		self.maquinas[i].situacao = 99;
+                		self.maquinas[i].tempo = self.maquinas[i].falhaComunicacao;
+                	} 
+                	
                     var segundos = parseInt(self.maquinas[i].tempo, 10); 
                     var segundo = parseInt(segundos % 60, 10); 
                     var minutos = parseInt(segundos / 60, 10); 
@@ -393,8 +405,8 @@
 
                 for( var i = 0; i < self.maquinas.length; ++i ) {
                     if (self.maquinas[i].codigo == msg.data.maquina) {
-                        //self.maquinas[i].tempo = msg.data.tempoFormatado;
-                        self.maquinas[i].situacao = msg.data.modo;
+
+                    	self.maquinas[i].situacao = msg.data.modo;
                         self.maquinas[i].operador = msg.data.operador;
 
                         var segundos = parseInt(msg.data.tempo, 10); 

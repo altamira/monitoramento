@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.altamira.monitoramento.model.IHM;
-import br.com.altamira.monitoramento.model.IHMLog;
 import br.com.altamira.monitoramento.model.Maquina;
 import br.com.altamira.monitoramento.model.MaquinaLogErro;
 import br.com.altamira.monitoramento.msg.StatusMsg;
@@ -65,16 +64,21 @@ public class MonitorScheduler {
 				//maquina.setOperador("");
 				//maquina.setAtualizacao(new Date());
 				
-				//maquinaRepository.saveAndFlush(maquina);
+				maquina.setFalhaComunicacao(statusMsg.getTempo());
+				
+				maquinaRepository.saveAndFlush(maquina);
 				
 				List<IHM> ihms = ihmRepository.findAllByMaquina(maquina.getCodigo());
 				
 				if (ihms != null && !ihms.isEmpty()) {
 					for (IHM ihm : ihms) {
-						//ihm.setVersao("?");
-						//ihmRepository.saveAndFlush(ihm);
 						
-						IHMLog ihmLog = new IHMLog(
+						//ihm.setVersao("?");
+						ihm.setFalhaComunicacao(statusMsg.getTempo());
+						
+						ihmRepository.saveAndFlush(ihm);
+						
+						/*IHMLog ihmLog = new IHMLog(
 								ihm.getCodigo().toUpperCase(),
 								statusMsg.getDatahora(),
 								statusMsg.getModo(),
@@ -83,7 +87,7 @@ public class MonitorScheduler {
 								statusMsg.getOperador()
 								);
 						
-						ihmLogRepository.saveAndFlush(ihmLog);
+						ihmLogRepository.saveAndFlush(ihmLog);*/
 					}
 				}
 				
@@ -97,7 +101,7 @@ public class MonitorScheduler {
 		        } catch (IOException e) {
 		        	System.out.println(String.format("\n********************************************************************************\nErro ao notificar os clientes.\n********************************************************************************\n%s\n********************************************************************************\n", e.getMessage()));
 
-		        	MaquinaLogErro broadcastErro = new MaquinaLogErro(new Date(), maquina.getCodigo(), String.format("Erro ao notificar os clientes %s %s", maquina.getCodigo(), maquina.getNome()), "");
+		        	MaquinaLogErro broadcastErro = new MaquinaLogErro(new Date(), maquina.getCodigo(), String.format("Erro ao notificar os clientes sobre TIMEOUT na maquina %s %s", maquina.getCodigo(), maquina.getNome()), "");
 					maquinaLogErroRepository.saveAndFlush(broadcastErro);
 		        }
 				

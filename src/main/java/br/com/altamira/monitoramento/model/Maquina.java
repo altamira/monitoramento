@@ -42,6 +42,9 @@ public class Maquina {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date atualizacao;
 	
+	@Column(name = "FALHA_COMUNICACAO")
+	private long falha;
+	
 	public Maquina() {
 		super();
 	}
@@ -116,6 +119,14 @@ public class Maquina {
 
 	public void setAtualizacao(Date atualizacao) {
 		this.atualizacao = atualizacao;
+	}
+
+	public long getFalhaComunicacao() {
+		return falha;
+	}
+
+	public void setFalhaComunicacao(long falha) {
+		this.falha = falha;
 	}
 		
 }

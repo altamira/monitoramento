@@ -5,11 +5,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import br.com.altamira.monitoramento.model.MaquinaLogErro;
+import br.com.altamira.monitoramento.model.IHMLogErro;
 
 @Repository
-public interface MaquinaLogErroRepository extends JpaRepository<MaquinaLogErro, Long> {
+public interface IHMLogErroRepository extends JpaRepository<IHMLogErro, Long> {
 	
-	Page<MaquinaLogErro> findAll(Pageable pageable);
+	Page<IHMLogErro> findAll(Pageable pageable);
 
 }

@@ -13,12 +13,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import br.com.altamira.monitoramento.model.IHM;
 import br.com.altamira.monitoramento.model.IHMLog;
+import br.com.altamira.monitoramento.model.IHMLogErro;
 import br.com.altamira.monitoramento.model.Maquina;
 import br.com.altamira.monitoramento.model.MaquinaLog;
 import br.com.altamira.monitoramento.model.MaquinaLogErro;
 import br.com.altamira.monitoramento.model.MaquinaLogParametro;
 import br.com.altamira.monitoramento.msg.ParametroMsg;
 import br.com.altamira.monitoramento.msg.StatusMsg;
+import br.com.altamira.monitoramento.repository.IHMLogErroRepository;
 import br.com.altamira.monitoramento.repository.IHMLogRepository;
 import br.com.altamira.monitoramento.repository.IHMRepository;
 import br.com.altamira.monitoramento.repository.MaquinaLogErroRepository;
@@ -54,6 +56,9 @@ public class MonitoramentoController {
 	private IHMLogRepository ihmLogRepository;
 	
 	@Autowired
+	private IHMLogErroRepository ihmLogErroRepository;	
+	
+	@Autowired
 	private MedidaRepository medidaRepository;
 	
 	@Autowired
@@ -63,18 +68,11 @@ public class MonitoramentoController {
 	@Transactional
 	@JmsListener(destination = "IHM-STATUS")
 	public void monitoramentoStatus(String msg) throws JsonParseException, JsonMappingException, IOException {
+		System.out.println(String.format(
+				"\n--------------------------------------------------------------------------------\nCHEGOU MENSAGEM DE IHM-STATUS\n--------------------------------------------------------------------------------\n%s\n--------------------------------------------------------------------------------\n", msg));
+
 		ObjectMapper mapper = new ObjectMapper();
 		StatusMsg statusMsg = mapper.readValue(msg, StatusMsg.class);
-		
-		if (statusMsg.getTempo() > 100 || statusMsg.getTempo() < 0) {
-			System.out.println(String.format(
-					"\n--------------------------------------------------------------------------------\nINTERVALO DE TEMPO INVALIDO: %s %d\n--------------------------------------------------------------------------------\n", statusMsg.getIHM().toUpperCase(), statusMsg.getTempo()));
-
-			MaquinaLogErro maquinaLogErro = new MaquinaLogErro(new Date(), statusMsg.getIHM().toUpperCase(), String.format("Intervalo de tempo invalido %d", statusMsg.getTempo()), msg);
-			maquinaLogErroRepository.saveAndFlush(maquinaLogErro);
-
-			if (statusMsg.getTempo() < 0) return;
-		}
 		
 		IHM ihm = ihmRepository.findOne(statusMsg.getIHM());
 		
@@ -84,18 +82,50 @@ public class MonitoramentoController {
 			
 			ihm = new IHM(statusMsg.getIHM());
 			
-			MaquinaLogErro maquinaLogErro = new MaquinaLogErro(new Date(), statusMsg.getIHM().toUpperCase(), "IHM nao cadastrada", msg);
-			maquinaLogErroRepository.saveAndFlush(maquinaLogErro);
+			IHMLogErro ihmLogErro = new IHMLogErro(new Date(), statusMsg.getIHM().toUpperCase(), "IHM nao cadastrada", msg);
+			ihmLogErroRepository.saveAndFlush(ihmLogErro);
 		
+			return;
+		}
+		
+		if (statusMsg.getTempo() < 0 || statusMsg.getTempo() > 45) {
+			System.out.println(String.format(
+					"\n--------------------------------------------------------------------------------\nINTERVALO DE TEMPO INVALIDO: %s %d\n--------------------------------------------------------------------------------\n", statusMsg.getIHM().toUpperCase(), statusMsg.getTempo()));
+
+			IHMLogErro ihmLogErro = new IHMLogErro(new Date(), ihm.getCodigo().toUpperCase(), String.format("Intervalo de tempo invalido, esperado entre 0s e 45s, recebido %ds", statusMsg.getTempo()), msg);
+			ihmLogErroRepository.saveAndFlush(ihmLogErro);
+
+			statusMsg.setTempo(0);
+		}
+		
+		if ((statusMsg.getSequencia() < 0) || (statusMsg.getSequencia() > 0 && ihm.getSequencia() + 1 != statusMsg.getSequencia())) {
+			System.out.println(String.format(
+					"\n--------------------------------------------------------------------------------\nERRO DE SEQUENCIA: %s\n--------------------------------------------------------------------------------\n", ihm.getMaquina().toUpperCase()));
+			
+			IHMLogErro ihmLogErro = new IHMLogErro(new Date(), ihm.getCodigo().toUpperCase(), String.format("Erro de sequencia, esperado %d, recebido %d", ihm.getSequencia() + 1, statusMsg.getSequencia()), msg);
+			ihmLogErroRepository.saveAndFlush(ihmLogErro);
+			
+			if (statusMsg.getSequencia() < 0) return; // sequencia invalida
+			if (statusMsg.getSequencia() < ihm.getSequencia() + 1) { // pacote duplicado ou perda de pacote
+				ihmLogErro = new IHMLogErro(new Date(), ihm.getCodigo().toUpperCase(), String.format("ALERTA: Possivel perda de pacote ou pacote duplicado, esperado %d, recebido %d", ihm.getSequencia() + 1, statusMsg.getSequencia()), msg);
+				ihmLogErroRepository.saveAndFlush(ihmLogErro);
+			}
+		}
+		
+		if (ihm.getSituacao() == statusMsg.getModo()) {
+			ihm.setTempo(ihm.getTempo() + statusMsg.getTempo());
+		} else {
+			ihm.setTempo(statusMsg.getTempo());
 		}
 		
 		ihm.setOperador(statusMsg.getOperador());
 		ihm.setVersao(statusMsg.getVersao());
+		ihm.setSituacao(statusMsg.getModo());
+		ihm.setSequencia(statusMsg.getSequencia());
+		ihm.setAtualizacao(new Date());
+		ihm.setFalhaComunicacao(0);
 		
 		ihmRepository.saveAndFlush(ihm);
-		
-		System.out.println(String.format(
-				"\n--------------------------------------------------------------------------------\nCHEGOU MENSAGEM DE IHM-STATUS\n--------------------------------------------------------------------------------\n%s\n--------------------------------------------------------------------------------\n", msg));
 		
 		IHMLog ihmLog = new IHMLog(
 				statusMsg.getIHM().toUpperCase(),
@@ -142,6 +172,7 @@ public class MonitoramentoController {
 			maquina.setSequencia(statusMsg.getSequencia());
 			maquina.setOperador(statusMsg.getOperador());
 			maquina.setAtualizacao(new Date());
+			maquina.setFalhaComunicacao(0);
 			
 			maquinaRepository.saveAndFlush(maquina);
 			
