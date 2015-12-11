@@ -187,7 +187,11 @@ public class MonitoramentoController {
 			
 			maquinaLogRepository.saveAndFlush(maquinaLog);
 			
-			if (statusMsg.getParametros() != null) {
+			/* FUNCAO TEMPORARIAMENTE DESABILITADA
+			 * PARA EVITAR ARMAZENAMENTO DE LOGS DESNECESSARIOS POIS 
+			 * A LEITURA DOS PARAMETROS NAO ESTA IMPLANTADA NA IHM POR ENQUANTO
+			 */
+			/*if (statusMsg.getParametros() != null) {
 				maquinaLog.setParametros(new HashSet<MaquinaLogParametro>());
 				
 				for (ParametroMsg medidaMsg : statusMsg.getParametros()) {
@@ -198,7 +202,7 @@ public class MonitoramentoController {
 							medidaMsg.getValor());
 					maquinaLogParametroRepository.saveAndFlush(maquinaLogParametro);
 				}
-			}
+			}*/
 			
 			statusMsg.setTempo(maquina.getTempo());
 			statusMsg.setRecebidoEm(new Date());
