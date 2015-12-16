@@ -30,7 +30,7 @@
 							</li> <!-- / .list-group-item -->
 							<!-- Without left and right borders, extra small horizontal padding, without background -->
 							<li class="list-group-item no-border-hr padding-xs-hr no-bg">
-								Total <span class="label label-danger pull-right">{{ maquina.total| timeFormat }}</span>
+								Total <span class="label label-danger pull-right">{{ maquina.total | timeFormat }}</span>
 							</li>  <!-- / .list-group-item -->
 							<!-- Without left and right borders, without bottom border, extra small horizontal padding, without background -->
 							<!--<li class="list-group-item no-border-hr no-border-b padding-xs-hr no-bg">
@@ -66,7 +66,7 @@
 					            <th>Recebido em</th>
 					            <th>Modo de Operacao</th>
 					            <th>Usuario</th>
-					            <th>Tempo Atividade (s)</th>
+					            <th>Tempo Atividade</th>
 					        </tr>
 					        </thead>
 					        <tbody>
@@ -76,7 +76,7 @@
 					        	<td>{{ row.recebidoEm | date : 'medium' }}</td>
 					            <td>{{ row.modo | statusName }}</td>
 					            <td>{{ row.operador }}</td>
-					            <td>{{ row.tempo }}</td>
+					            <td>{{ row.tempo | dayFormat }}</td>
 					        </tr>
 					        </tbody>
 					    </table>

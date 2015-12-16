@@ -191,26 +191,6 @@
                 		self.maquinas[i].tempo = self.maquinas[i].falhaComunicacao;
                 	} 
                 	
-                    var segundos = parseInt(self.maquinas[i].tempo, 10); 
-                    var segundo = parseInt(segundos % 60, 10); 
-                    var minutos = parseInt(segundos / 60, 10); 
-                    var minuto = parseInt(minutos % 60, 10); 
-                    var horas = parseInt(minutos / 60, 10);
-                    var hora = parseInt(horas % 24, 10);
-                    var dias = parseInt(horas / 24, 10); 
-                    var dia = parseInt(dias, 10);
-                    
-                    if (dia > 1) {
-                        self.maquinas[i].tempo = dia + ' dias'
-                    } else if (dia == 1) {
-                        self.maquinas[i].tempo = dia + ' dia'
-                    } else if (hora > 0) {
-                        self.maquinas[i].tempo = hora + ' h'
-                    } else if (minuto > 0) {
-                        self.maquinas[i].tempo = minuto + ' min'
-                    } else {
-                        self.maquinas[i].tempo = segundo + ' s';
-                    }
                 }
             });
         }
@@ -261,27 +241,8 @@
 
                     	self.maquinas[i].situacao = msg.data.modo;
                         self.maquinas[i].operador = msg.data.operador;
+                        self.maquinas[i].tempo = msg.data.tempo;
 
-                        var segundos = parseInt(msg.data.tempo, 10); 
-                        var segundo = parseInt(segundos % 60, 10); 
-                        var minutos = parseInt(segundos / 60, 10); 
-                        var minuto = parseInt(minutos % 60, 10); 
-                        var horas = parseInt(minutos / 60, 10);
-                        var hora = parseInt(horas % 24, 10);
-                        var dias = parseInt(horas / 24, 10); 
-                        var dia = parseInt(dias, 10);
-                        
-                        if (dia > 1) {
-                            self.maquinas[i].tempo = dia + ' dias'
-                        } else if (dia == 1) {
-                            self.maquinas[i].tempo = dia + ' dia'
-                        } else if (hora > 0) {
-                            self.maquinas[i].tempo = hora + ' h'
-                        } else if (minuto > 0) {
-                            self.maquinas[i].tempo = minuto + ' min'
-                        } else {
-                            self.maquinas[i].tempo = segundo + ' s';
-                        }
                     }
                 }
                 
@@ -433,6 +394,35 @@
         }
     }); 
 
+    module.filter('dayFormat', function() {
+    	return function (input) {
+    		var segundos = parseInt(input, 10); 
+            var segundo = parseInt(segundos % 60, 10); 
+            var minutos = parseInt(segundos / 60, 10); 
+            var minuto = parseInt(minutos % 60, 10); 
+            var horas = parseInt(minutos / 60, 10);
+            var hora = parseInt(horas % 24, 10);
+            var dias = parseInt(horas / 24, 10); 
+            var dia = parseInt(dias, 10);
+            
+            var format = '';
+            
+            if (dia > 1) {
+            	format = dia + ' dias'
+            } else if (dia == 1) {
+            	format = dia + ' dia'
+            } else if (hora > 0) {
+            	format = hora + ' h'
+            } else if (minuto > 0) {
+            	format = minuto + ' min'
+            } else {
+            	format = segundo + ' s';
+            }
+            
+            return format;
+    	}
+    });
+    
     module.filter('timeFormat', function () {
         return function (input) {
             var segundos = parseInt(input, 10); 
