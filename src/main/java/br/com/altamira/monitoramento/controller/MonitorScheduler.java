@@ -1,6 +1,7 @@
 package br.com.altamira.monitoramento.controller;
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -20,6 +21,7 @@ import br.com.altamira.monitoramento.repository.MaquinaLogErroRepository;
 import br.com.altamira.monitoramento.repository.MaquinaRepository;
 
 @Component
+@Transactional
 public class MonitorScheduler {
 
 	@Autowired
@@ -38,10 +40,24 @@ public class MonitorScheduler {
 	@Autowired
 	private IHMLogRepository ihmLogRepository;
 
-	@Transactional
 	@Scheduled(fixedDelay = 30000)
 	// @Scheduled(fixedRate = 5000)
 	public void demoServiceMethod() {
+		
+		/*
+		Calendar calendar = Calendar.getInstance();
+		//calendar.setTime(statusMsg.getDatahora());
+		int hora = calendar.get(Calendar.HOUR_OF_DAY);
+		int minuto = calendar.get(Calendar.MINUTE);
+		//int segundo = calendar.get(Calendar.SECOND);
+		
+		if (hora < 7 || (hora == 9 && minuto <= 12) || (hora == 12) || (hora == 13 && minuto <= 12) || (hora >= 17 && minuto > 0)) {
+			System.out.println(String.format(
+					"\n--------------------------------------------------------------------------------\n%s MONITORAMENTO DAS CONEXOES DESATIVO FORA HORARIO DE EXPEDIENTE PARA NAO GERAR REGISTRO NO BANCO DE DADOS.\n--------------------------------------------------------------------------------\n", calendar.toString()));
+			return;
+		}
+		*/
+		
 		System.out.println(String.format(
 				"\n--------------------------------------------------------------------------------\nVerificando o estado das conexoes das maquinas...\n--------------------------------------------------------------------------------\n"));
 

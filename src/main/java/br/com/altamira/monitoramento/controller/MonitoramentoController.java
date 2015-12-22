@@ -2,7 +2,6 @@ package br.com.altamira.monitoramento.controller;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.HashSet;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -17,8 +16,6 @@ import br.com.altamira.monitoramento.model.IHMLogErro;
 import br.com.altamira.monitoramento.model.Maquina;
 import br.com.altamira.monitoramento.model.MaquinaLog;
 import br.com.altamira.monitoramento.model.MaquinaLogErro;
-import br.com.altamira.monitoramento.model.MaquinaLogParametro;
-import br.com.altamira.monitoramento.msg.ParametroMsg;
 import br.com.altamira.monitoramento.msg.StatusMsg;
 import br.com.altamira.monitoramento.repository.IHMLogErroRepository;
 import br.com.altamira.monitoramento.repository.IHMLogRepository;
@@ -34,6 +31,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Controller
+@Transactional
 @RequestMapping("/api/monitor")
 public class MonitoramentoController {
 
@@ -65,7 +63,6 @@ public class MonitoramentoController {
 	@Qualifier("WebSocketHandler") 
 	private SendingTextWebSocketHandler sendingTextWebSocketHandler;
 
-	@Transactional
 	@JmsListener(destination = "IHM-STATUS")
 	public void monitoramentoStatus(String msg) throws JsonParseException, JsonMappingException, IOException {
 		System.out.println(String.format(
@@ -88,11 +85,11 @@ public class MonitoramentoController {
 			return;
 		}
 		
-		if (statusMsg.getTempo() < 0 || statusMsg.getTempo() > 45) {
+		if (statusMsg.getTempo() < 0 || statusMsg.getTempo() > 60) {
 			System.out.println(String.format(
-					"\n--------------------------------------------------------------------------------\nINTERVALO DE TEMPO INVALIDO: %s %d\n--------------------------------------------------------------------------------\n", statusMsg.getIHM().toUpperCase(), statusMsg.getTempo()));
+					"\n--------------------------------------------------------------------------------\nINTERVALO DE TEMPO INVALIDO: %s %d (ESPERADO ENTRE 0s E 60s)\n--------------------------------------------------------------------------------\n", statusMsg.getIHM().toUpperCase(), statusMsg.getTempo()));
 
-			IHMLogErro ihmLogErro = new IHMLogErro(new Date(), ihm.getCodigo().toUpperCase(), String.format("Intervalo de tempo invalido, esperado entre 0s e 45s, recebido %ds", statusMsg.getTempo()), msg);
+			IHMLogErro ihmLogErro = new IHMLogErro(new Date(), ihm.getCodigo().toUpperCase(), String.format("Intervalo de tempo invalido, esperado entre 0s e 60s, recebido %ds", statusMsg.getTempo()), msg);
 			ihmLogErroRepository.saveAndFlush(ihmLogErro);
 
 			statusMsg.setTempo(0);
@@ -111,6 +108,20 @@ public class MonitoramentoController {
 				ihmLogErroRepository.saveAndFlush(ihmLogErro);
 			}
 		}
+		
+		/*
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(statusMsg.getDatahora());
+		int hora = calendar.get(Calendar.HOUR_OF_DAY);
+		int minuto = calendar.get(Calendar.MINUTE);
+		//int segundo = calendar.get(Calendar.SECOND);
+		
+		if (hora < 7 || (hora == 9 && minuto <= 12) || (hora == 12) || (hora == 13 && minuto <= 12) || (hora >= 17 && minuto > 0)) {
+			System.out.println(String.format(
+					"\n--------------------------------------------------------------------------------\n%s: MENSAGEM RECEBIDA FORA DO HORARIO DE EXPEDIENTE E IGNORADA PARA NAO GERAR REGISTRO NO BANCO DE DADOS.\n--------------------------------------------------------------------------------\n", statusMsg.getIHM()));
+			return;
+		}
+		*/
 		
 		if (ihm.getSituacao() == statusMsg.getModo()) {
 			ihm.setTempo(ihm.getTempo() + statusMsg.getTempo());
@@ -146,7 +157,7 @@ public class MonitoramentoController {
 				System.out.println(String.format(
 						"\n--------------------------------------------------------------------------------\nMAQUINA NAO ENCONTRADA: %s\n--------------------------------------------------------------------------------\n", ihm.getMaquina().toUpperCase()));
 				
-				MaquinaLogErro maquinaLogErro = new MaquinaLogErro(new Date(), maquina.getCodigo().toUpperCase(), String.format("Maquina nao encontrada %s", ihm.getMaquina().toUpperCase()), msg);
+				MaquinaLogErro maquinaLogErro = new MaquinaLogErro(new Date(), ihm.getMaquina().toUpperCase(), String.format("Maquina nao encontrada %s", ihm.getMaquina().toUpperCase()), msg);
 				maquinaLogErroRepository.saveAndFlush(maquinaLogErro);
 				
 				return;
